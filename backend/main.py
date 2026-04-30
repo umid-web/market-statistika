@@ -201,53 +201,59 @@ async def add_customer(customer: dict):
     with open(CUSTOMERS_FILE, 'w', encoding='utf-8') as f:
         json.dump(customers, f, ensure_ascii=False, indent=2)
     return {"status": "ok", "customer": customer}
-def run_analytics_task():
-    """Tahlilni fonda ishga tushirish (Spark yoki Pandas fallback)"""
-    import os as _os
-    import sys
-    base_dir = Path.cwd()
-    
-    # 1. Spark-ni sinab ko'ramiz
-    try:
-        spark_script = base_dir / "src" / "bigdata_hadoop_spark_job.py"
-        if spark_script.exists():
-            # Platformaga mos buyruqni tanlash
-            if _os.name == 'nt':
-                cmd = ["powershell", "-Command", f"& '{sys.executable}' '{spark_script}' --input-path '{base_dir}/data/raw_orders/*.csv' --output-path '{base_dir}/data/output_analytics' --checkpoint-path '{base_dir}/data/temp/checkpoints'"]
-            else:
-                cmd = [sys.executable, str(spark_script), "--input-path", f"{base_dir}/data/raw_orders/*.csv", "--output-path", f"{base_dir}/data/output_analytics", "--checkpoint-path", f"{base_dir}/data/temp/checkpoints"]
-            
-            subprocess.Popen(cmd)
-            return True
-    except Exception as e:
-        print(f"Spark trigger error: {e}")
 
-    # 2. Agar Spark ishlamasa, Pandas-da tezkor tahlil qilamiz (Fallback)
+def run_analytics_task():
+    """Tahlillarni Pandas orqali bevosita backend ichida hisoblash"""
     try:
-        if SALES_FILE.exists():
-            df = pd.read_csv(SALES_FILE)
-            if not df.empty:
-                df['sell_price'] = pd.to_numeric(df['sell_price'], errors='coerce').fillna(0)
-                df['buy_price'] = pd.to_numeric(df['buy_price'], errors='coerce').fillna(0)
-                df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce').fillna(0)
-                df['total_revenue'] = df['sell_price'] * df['quantity']
-                df['total_profit'] = (df['sell_price'] - df['buy_price']) * df['quantity']
-                df['order_month'] = pd.to_datetime(df['order_date']).dt.strftime('%Y-%m')
-                
-                agg = df.groupby(['order_month', 'product_name', 'category']).agg({
-                    'quantity': 'sum',
-                    'total_revenue': 'sum',
-                    'total_profit': 'sum'
-                }).reset_index()
-                
-                agg.rename(columns={'quantity': 'total_quantity'}, inplace=True)
-                ANALYTICS_DIR.mkdir(parents=True, exist_ok=True)
-                # Parquet sifatida saqlaymiz (Spark bilan bir xil format)
-                agg.to_parquet(ANALYTICS_DIR / "part-0000.parquet", index=False)
-                return True
+        if not SALES_FILE.exists():
+            return False
+            
+        df = pd.read_csv(SALES_FILE)
+        if df.empty or len(df) < 1:
+            return False
+
+        # Ma'lumotlarni tozalash
+        df['sell_price'] = pd.to_numeric(df['sell_price'], errors='coerce').fillna(0)
+        df['buy_price'] = pd.to_numeric(df['buy_price'], errors='coerce').fillna(0)
+        df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce').fillna(0)
+        df['order_date'] = pd.to_datetime(df['order_date'], errors='coerce')
+        
+        # Hisob-kitob
+        df['total_revenue'] = df['sell_price'] * df['quantity']
+        df['total_cost'] = df['buy_price'] * df['quantity']
+        df['total_profit'] = df['total_revenue'] - df['total_cost']
+        df['order_month'] = df['order_date'].dt.strftime('%Y-%m')
+
+        # Agregatsiya
+        agg_df = df.groupby(['order_month', 'product_name', 'category']).agg({
+            'quantity': 'sum',
+            'total_revenue': 'sum',
+            'total_profit': 'sum',
+            'order_id': 'count'
+        }).reset_index()
+
+        agg_df.columns = ['order_month', 'product_name', 'category', 'total_quantity', 'total_revenue', 'total_profit', 'sales_count']
+
+        # Reytinglar
+        agg_df['profit_rank'] = agg_df.groupby(['order_month', 'category'])['total_profit'].rank(ascending=False, method='min')
+        
+        # O'sish dinamikasi
+        agg_df = agg_df.sort_values(['product_name', 'order_month'])
+        agg_df['prev_month_revenue'] = agg_df.groupby('product_name')['total_revenue'].shift(1)
+        agg_df['growth_percent'] = ((agg_df['total_revenue'] - agg_df['prev_month_revenue']) / agg_df['prev_month_revenue'] * 100).fillna(0).round(1)
+
+        # JSON va Parquet ko'rinishida saqlash (Maksimal moslashuvchanlik uchun)
+        ANALYTICS_DIR.mkdir(parents=True, exist_ok=True)
+        results = agg_df.to_dict(orient="records")
+        with open(ANALYTICS_DIR / "analytics.json", "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+            
+        # Parquet (eski UI uchun)
+        agg_df.to_parquet(ANALYTICS_DIR / "part-0000.parquet", index=False)
+        return True
     except Exception as e:
-        print(f"Pandas fallback error: {e}")
-    return False
+        print(f"Analytics error: {e}")
+        return False
 
 @app.post("/api/sales")
 async def add_sale(payload: dict):
