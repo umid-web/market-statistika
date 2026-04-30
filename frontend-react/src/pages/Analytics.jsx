@@ -14,11 +14,25 @@ import {
 import { useStore } from '../context/StoreContext';
 
 const Analytics = () => {
-  const { analytics: data, fetchAnalytics } = useStore();
+  const { analytics, fetchAnalytics } = useStore();
+  const data = Array.isArray(analytics) ? analytics : [];
   
   React.useEffect(() => {
     fetchAnalytics();
   }, []);
+
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '80vh', gap: '2rem' }}>
+        <div className="animate-spin" style={{ width: '50px', height: '50px', border: '3px solid rgba(212, 175, 55, 0.1)', borderTop: '3px solid #d4af37', borderRadius: '50%' }}></div>
+        <div style={{ textAlign: 'center' }}>
+          <h2 className="text-gradient-gold">Tahlillar tayyorlanmoqda...</h2>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Agar bu birinchi marta bo'lsa, sozlamalardan "Demo Ma'lumotlarni Yuklash"ni bosing.</p>
+        </div>
+      </div>
+    );
+  }
+
   const COLORS = ['#d4af37', '#00f2ff', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
 
   const categoryData = Object.entries(data.reduce((acc, curr) => {
