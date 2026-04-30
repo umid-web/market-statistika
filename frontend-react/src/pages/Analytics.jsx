@@ -7,21 +7,15 @@ import {
   FileSpreadsheet,
   ArrowUpRight,
   RefreshCcw,
-  Trophy
+  Download
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { useStore } from '../context/StoreContext';
-
-const FALLBACK_DATA = [
-  { order_month: '2026-04', product_name: 'iPhone 15 Pro', category: 'Smartfonlar', total_quantity: 15, total_revenue: 180000000, total_profit: 45000000, profit_rank: 1, growth_percent: 12.5 },
-  { order_month: '2026-04', product_name: 'MacBook Air M2', category: 'Noutbuklar', total_quantity: 8, total_revenue: 144000000, total_profit: 32000000, profit_rank: 2, growth_percent: 8.2 },
-  { order_month: '2026-04', product_name: 'iPad Pro M2', category: 'Planshetlar', total_quantity: 12, total_revenue: 96000000, total_profit: 24000000, profit_rank: 3, growth_percent: -2.1 },
-  { order_month: '2026-04', product_name: 'AirPods Pro 2', category: 'Aksessuarlar', total_quantity: 45, total_revenue: 135000000, total_profit: 18000000, profit_rank: 4, growth_percent: 15.0 }
-];
 
 const Analytics = () => {
   const { analytics, fetchAnalytics, addNotification } = useStore();
   const [syncing, setSyncing] = React.useState(false);
-  const data = Array.isArray(analytics) && analytics.length > 0 ? analytics : FALLBACK_DATA;
+  const data = Array.isArray(analytics) ? analytics : [];
 
   const handleSync = async () => {
     try {
@@ -33,6 +27,29 @@ const Analytics = () => {
     } finally {
       setSyncing(false);
     }
+  };
+
+  const handleExport = () => {
+    if (data.length === 0) {
+      addNotification("Eksport qilish uchun ma'lumot yo'q!", "error");
+      return;
+    }
+    const excelData = data.map((row) => ({
+      'Reyting (Spark)': row.profit_rank,
+      'Maxsulot Nomi': row.product_name,
+      'Hisobot Oyi': row.order_month,
+      'Kategoriya': row.category,
+      'Sotuv Miqdori': row.total_quantity,
+      'Jami Tushum': row.total_revenue,
+      'Sof Foyda': row.total_profit,
+      'O\'sish (%)': row.growth_percent
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Spark Analytics");
+    XLSX.writeFile(workbook, "Spark_BigData_Hisoboti.xlsx");
+    addNotification("Excel hisoboti yuklab olindi", "success");
   };
 
   return (
@@ -47,10 +64,15 @@ const Analytics = () => {
           <h2 style={{ fontSize: '2.5rem', fontWeight: '800', letterSpacing: '-1.5px' }} className="text-gradient-gold">Hisobotlar Markazi</h2>
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Big Data muhitida qayta ishlangan sotuvlar tahlili</p>
         </div>
-        <button className="btn-premium" onClick={handleSync} disabled={syncing}>
-          <RefreshCcw size={18} className={syncing ? "animate-spin" : ""} style={{ marginRight: '0.75rem' }} />
-          {syncing ? "Spark Processing..." : "Tahlillarni Yangilash"}
-        </button>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button className="btn-premium btn-ghost" onClick={handleExport} style={{ border: '1px solid rgba(212, 175, 55, 0.3)' }}>
+            <Download size={18} style={{ marginRight: '0.75rem' }} /> Export (Excel)
+          </button>
+          <button className="btn-premium" onClick={handleSync} disabled={syncing}>
+            <RefreshCcw size={18} className={syncing ? "animate-spin" : ""} style={{ marginRight: '0.75rem' }} />
+            {syncing ? "Spark Processing..." : "Tahlillarni Yangilash"}
+          </button>
+        </div>
       </div>
 
       {/* System Status Section */}

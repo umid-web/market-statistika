@@ -187,7 +187,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <DataTable data={analytics} />
     </div>
   );
 };
