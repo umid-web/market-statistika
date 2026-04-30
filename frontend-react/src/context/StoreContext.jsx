@@ -20,21 +20,28 @@ export const StoreProvider = ({ children }) => {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/products`);
       setProducts(res.data);
-    } catch (err) {}
+    } catch (err) {
+      addNotification("Mahsulotlarni yuklashda xatolik!", "error");
+    }
   };
 
   const fetchAnalytics = async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/analytics`);
       setAnalytics(res.data);
-    } catch (err) {}
+    } catch (err) {
+      // Tahlillar hali tayyor bo'lmasligi mumkin, jim o'tamiz
+      console.log("Analytics not ready yet");
+    }
   };
 
   const fetchSettings = async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/settings`);
       setSettings(res.data);
-    } catch (err) {}
+    } catch (err) {
+      addNotification("Sozlamalarni yuklashda xatolik!", "error");
+    }
   };
 
   useEffect(() => {

@@ -197,14 +197,53 @@ async def add_customer(customer: dict):
     with open(CUSTOMERS_FILE, 'w', encoding='utf-8') as f:
         json.dump(customers, f, ensure_ascii=False, indent=2)
     return {"status": "ok", "customer": customer}
+def run_analytics_task():
+    """Tahlilni fonda ishga tushirish (Spark yoki Pandas fallback)"""
+    import os as _os
+    import sys
+    base_dir = Path.cwd()
+    
+    # 1. Spark-ni sinab ko'ramiz
+    try:
+        spark_script = base_dir / "src" / "bigdata_hadoop_spark_job.py"
+        if spark_script.exists():
+            # Platformaga mos buyruqni tanlash
+            if _os.name == 'nt':
+                cmd = ["powershell", "-Command", f"& '{sys.executable}' '{spark_script}' --input-path '{base_dir}/data/raw_orders/*.csv' --output-path '{base_dir}/data/output_analytics' --checkpoint-path '{base_dir}/data/temp/checkpoints'"]
+            else:
+                cmd = [sys.executable, str(spark_script), "--input-path", f"{base_dir}/data/raw_orders/*.csv", "--output-path", f"{base_dir}/data/output_analytics", "--checkpoint-path", f"{base_dir}/data/temp/checkpoints"]
+            
+            subprocess.Popen(cmd)
+            return True
+    except Exception as e:
+        print(f"Spark trigger error: {e}")
 
-@app.delete("/api/customers/{customer_id}")
-async def delete_customer(customer_id: int):
-    customers = await get_customers()
-    customers = [c for c in customers if c.get('id') != customer_id]
-    with open(CUSTOMERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(customers, f, ensure_ascii=False, indent=2)
-    return {"status": "ok"}
+    # 2. Agar Spark ishlamasa, Pandas-da tezkor tahlil qilamiz (Fallback)
+    try:
+        if SALES_FILE.exists():
+            df = pd.read_csv(SALES_FILE)
+            if not df.empty:
+                df['sell_price'] = pd.to_numeric(df['sell_price'], errors='coerce').fillna(0)
+                df['buy_price'] = pd.to_numeric(df['buy_price'], errors='coerce').fillna(0)
+                df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce').fillna(0)
+                df['total_revenue'] = df['sell_price'] * df['quantity']
+                df['total_profit'] = (df['sell_price'] - df['buy_price']) * df['quantity']
+                df['order_month'] = pd.to_datetime(df['order_date']).dt.strftime('%Y-%m')
+                
+                agg = df.groupby(['order_month', 'product_name', 'category']).agg({
+                    'quantity': 'sum',
+                    'total_revenue': 'sum',
+                    'total_profit': 'sum'
+                }).reset_index()
+                
+                agg.rename(columns={'quantity': 'total_quantity'}, inplace=True)
+                ANALYTICS_DIR.mkdir(parents=True, exist_ok=True)
+                # Parquet sifatida saqlaymiz (Spark bilan bir xil format)
+                agg.to_parquet(ANALYTICS_DIR / "part-0000.parquet", index=False)
+                return True
+    except Exception as e:
+        print(f"Pandas fallback error: {e}")
+    return False
 
 @app.post("/api/sales")
 async def add_sale(payload: dict):
@@ -214,51 +253,31 @@ async def add_sale(payload: dict):
         products = await get_products()
         products_by_id = {int(p.get('id')): p for p in products if p.get('id') is not None}
         products_by_sku = {str(p.get('sku')): p for p in products if p.get('sku')}
-        products_by_name = {}
-        for p in products:
-            name_key = str(p.get('name', '')).strip().lower()
-            if name_key and name_key not in products_by_name:
-                products_by_name[name_key] = p
+        products_by_name = {str(p.get('name', '')).strip().lower(): p for p in products}
 
         prepared_rows = []
         with open(SALES_FILE, 'a', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             for item in sales:
                 qty = _to_float(item.get('quantity', 0))
-                if qty <= 0:
-                    raise HTTPException(status_code=400, detail="Miqdor 0 dan katta bo'lishi kerak")
+                if qty <= 0: continue
 
                 matched = None
-                if item.get('product_id') is not None:
-                    try:
-                        matched = products_by_id.get(int(item.get('product_id')))
-                    except (TypeError, ValueError):
-                        matched = None
-                if matched is None and item.get('sku'):
-                    matched = products_by_sku.get(str(item.get('sku')))
-                if matched is None:
-                    matched = products_by_name.get(str(item.get('product_name', '')).strip().lower())
-                if matched is None:
-                    unknown_name = item.get('product_name') or "Noma'lum"
-                    raise HTTPException(status_code=404, detail=f"Maxsulot topilmadi: {unknown_name}")
+                if item.get('product_id'): matched = products_by_id.get(int(item.get('product_id')))
+                if not matched and item.get('sku'): matched = products_by_sku.get(str(item.get('sku')))
+                if not matched: matched = products_by_name.get(str(item.get('product_name', '')).strip().lower())
+                
+                if not matched: continue
 
                 current_stock = _to_float(matched.get('stock', 0))
-                if qty > current_stock:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"{matched.get('name')} uchun zaxira yetarli emas. Mavjud: {current_stock}, so'ralgan: {qty}"
-                    )
-
                 sell_price = _to_float(item.get('sell_price', matched.get('sell_price', 0)))
                 buy_price = _to_float(item.get('buy_price', matched.get('buy_price', 0)))
-                if sell_price < buy_price:
-                    raise HTTPException(status_code=400, detail=f"{matched.get('name')} uchun sell_price buy_price dan kichik")
 
-                matched['stock'] = current_stock - qty
+                matched['stock'] = max(0, current_stock - qty)
                 prepared_rows.append([
                     order_id,
-                    matched.get('name', item.get('product_name', '')),
-                    item.get('category', matched.get('category', '')),
+                    matched.get('name'),
+                    matched.get('category'),
                     sell_price,
                     buy_price,
                     qty,
@@ -269,13 +288,13 @@ async def add_sale(payload: dict):
 
             for row in prepared_rows:
                 writer.writerow(row)
+        
         with open(PRODUCTS_FILE, 'w', encoding='utf-8') as f:
             json.dump(products, f, ensure_ascii=False, indent=2)
-        # PySpark tahlili faqat lokal Windows muhitida ishlaydi
-        import os as _os
-        if _os.name == 'nt':
-            base_dir = Path.cwd()
-            subprocess.Popen(["powershell", "-Command", f"& '{base_dir}/.venv/Scripts/python' '{base_dir}/src/bigdata_hadoop_spark_job.py' --input-path '{base_dir}/data/raw_orders/*.csv' --output-path '{base_dir}/data/output_analytics' --checkpoint-path '{base_dir}/data/temp/checkpoints'"])
+            
+        # Tahlilni yangilash
+        run_analytics_task()
+        
         return {"status": "ok", "order_id": order_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -285,20 +304,24 @@ async def get_sales_history():
     if not SALES_FILE.exists(): return []
     try:
         df = pd.read_csv(SALES_FILE)
-        df['sell_price'] = pd.to_numeric(df['sell_price'], errors='coerce').fillna(0)
-        df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce').fillna(0)
         return df.fillna("").to_dict(orient="records")
     except Exception as e: 
-        return [{"error": str(e)}]
+        return []
 
 @app.get("/api/analytics")
 async def get_analytics():
-    if not ANALYTICS_DIR.exists() or not any(ANALYTICS_DIR.iterdir()): return []
+    # Agar tahlil hali yo'q bo'lsa, uni yaratishga harakat qilamiz
+    if not ANALYTICS_DIR.exists() or not any(ANALYTICS_DIR.iterdir()):
+        run_analytics_task()
+        
+    if not ANALYTICS_DIR.exists() or not any(ANALYTICS_DIR.iterdir()):
+        return []
+
     try:
         df = pd.read_parquet(ANALYTICS_DIR)
-        return df.fillna(0).to_dict(orient="records") if not df.empty else []
+        return df.fillna(0).to_dict(orient="records")
     except Exception as e: 
-        return [{"error": str(e)}]
+        return []
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

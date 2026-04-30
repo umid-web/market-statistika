@@ -44,10 +44,10 @@ const POS = () => {
 
   // Filter products by name, category, SKU or barcode
   const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.barcode?.toLowerCase().includes(searchTerm.toLowerCase())
+    (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.category || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.sku || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.barcode || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {

@@ -61,8 +61,8 @@ const Admin = () => {
   };
 
   const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+    (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (p.sku || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleDelete = async (id) => {
