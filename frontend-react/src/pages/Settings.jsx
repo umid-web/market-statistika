@@ -75,21 +75,6 @@ const Settings = () => {
     }
   };
 
-  const handleGenerateDemoData = async () => {
-    try {
-      setSaving(true);
-      await axios.post(`${API_BASE_URL}/api/system/generate-demo-data`);
-      addNotification("50 ta test sotuvi yaratildi!", "success");
-      setTimeout(() => {
-        fetchAnalytics();
-        setSaving(false);
-      }, 5000);
-    } catch (err) {
-      addNotification("Xatolik yuz berdi!", "error");
-      setSaving(false);
-    }
-  };
-
   if (loading) return <div style={{ padding: '2rem', color: '#d4af37' }}>Yuklanmoqda...</div>;
 
   return (
@@ -238,21 +223,6 @@ const Settings = () => {
 
           {activeTab === 'system' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              <div className="stat-item">
-                <h3 style={{ color: '#d4af37', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Activity size={20} /> Ma'lumotlar Tahlili (Demo)
-                </h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.6' }}>
-                  Agar tahlillar (Analytics) bo'sh bo'lsa, ushbu tugmani bosib 50 ta test sotuvini yaratishingiz mumkin. Bu Spark/Pandas tahlil tizimini tekshirish uchun kerak.
-                </p>
-                <button className="btn-premium" onClick={handleGenerateDemoData} disabled={saving}>
-                  <Activity size={18} style={{ marginRight: '0.75rem' }} />
-                  {saving ? 'Yaratilmoqda...' : 'Demo Ma\'lumotlarni Yuklash'}
-                </button>
-              </div>
-
-              <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
-
               <div className="stat-item">
                 <h3 style={{ color: '#ef4444', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Trash2 size={20} /> Xavfli Hudud

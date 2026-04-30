@@ -27,7 +27,7 @@ const Analytics = () => {
         <div className="animate-spin" style={{ width: '50px', height: '50px', border: '3px solid rgba(212, 175, 55, 0.1)', borderTop: '3px solid #d4af37', borderRadius: '50%' }}></div>
         <div style={{ textAlign: 'center' }}>
           <h2 className="text-gradient-gold">Tahlillar tayyorlanmoqda...</h2>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Agar bu birinchi marta bo'lsa, sozlamalardan "Demo Ma'lumotlarni Yuklash"ni bosing.</p>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Haqiqiy sotuvlar amalga oshirilishi bilan bu yerda tahlillar ko'rinadi.</p>
         </div>
       </div>
     );
