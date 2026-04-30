@@ -203,7 +203,7 @@ async def add_customer(customer: dict):
     return {"status": "ok", "customer": customer}
 
 def run_analytics_task():
-    """Tahlillarni Pandas orqali bevosita backend ichida hisoblash"""
+    """Tahlillarni Pandas orqali bevosita backend ichida hisoblash (Robust version)"""
     try:
         if not SALES_FILE.exists():
             return False
@@ -212,19 +212,23 @@ def run_analytics_task():
         if df.empty or len(df) < 1:
             return False
 
-        # Ma'lumotlarni tozalash
-        df['sell_price'] = pd.to_numeric(df['sell_price'], errors='coerce').fillna(0)
-        df['buy_price'] = pd.to_numeric(df['buy_price'], errors='coerce').fillna(0)
-        df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce').fillna(0)
-        df['order_date'] = pd.to_datetime(df['order_date'], errors='coerce')
+        # 1. Ma'lumotlarni tozalash (Explicit types)
+        df['sell_price'] = pd.to_numeric(df['sell_price'], errors='coerce').fillna(0).astype(float)
+        df['buy_price'] = pd.to_numeric(df['buy_price'], errors='coerce').fillna(0).astype(float)
+        df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce').fillna(0).astype(float)
         
-        # Hisob-kitob
+        # Sanani o'qish (Bir necha formatda sinash)
+        df['order_date'] = pd.to_datetime(df['order_date'], errors='coerce')
+        # Agar sana o'qilmasa, bugungi sanani qo'yamiz
+        df['order_date'] = df['order_date'].fillna(pd.Timestamp.now())
+        
+        # 2. Hisob-kitob
         df['total_revenue'] = df['sell_price'] * df['quantity']
         df['total_cost'] = df['buy_price'] * df['quantity']
         df['total_profit'] = df['total_revenue'] - df['total_cost']
         df['order_month'] = df['order_date'].dt.strftime('%Y-%m')
 
-        # Agregatsiya
+        # 3. Agregatsiya
         agg_df = df.groupby(['order_month', 'product_name', 'category']).agg({
             'quantity': 'sum',
             'total_revenue': 'sum',
@@ -234,25 +238,33 @@ def run_analytics_task():
 
         agg_df.columns = ['order_month', 'product_name', 'category', 'total_quantity', 'total_revenue', 'total_profit', 'sales_count']
 
-        # Reytinglar
-        agg_df['profit_rank'] = agg_df.groupby(['order_month', 'category'])['total_profit'].rank(ascending=False, method='min')
+        # 4. Reytinglar
+        agg_df['profit_rank'] = agg_df.groupby(['order_month', 'category'])['total_profit'].rank(ascending=False, method='min').astype(int)
         
-        # O'sish dinamikasi
+        # 5. O'sish dinamikasi
         agg_df = agg_df.sort_values(['product_name', 'order_month'])
-        agg_df['prev_month_revenue'] = agg_df.groupby('product_name')['total_revenue'].shift(1)
-        agg_df['growth_percent'] = ((agg_df['total_revenue'] - agg_df['prev_month_revenue']) / agg_df['prev_month_revenue'] * 100).fillna(0).round(1)
+        agg_df['prev_month_revenue'] = agg_df.groupby('product_name')['total_revenue'].shift(1).fillna(0)
+        agg_df['growth_percent'] = 0.0
+        mask = agg_df['prev_month_revenue'] > 0
+        agg_df.loc[mask, 'growth_percent'] = ((agg_df['total_revenue'] - agg_df['prev_month_revenue']) / agg_df['prev_month_revenue'] * 100).round(1)
 
-        # JSON va Parquet ko'rinishida saqlash (Maksimal moslashuvchanlik uchun)
+        # 6. Saqlash
         ANALYTICS_DIR.mkdir(parents=True, exist_ok=True)
-        results = agg_df.to_dict(orient="records")
+        results = agg_df.fillna(0).to_dict(orient="records")
+        
+        # JSON (Asosiy format)
         with open(ANALYTICS_DIR / "analytics.json", "w", encoding="utf-8") as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
             
-        # Parquet (eski UI uchun)
+        # Parquet (Eski UI va Big Data uchun)
         agg_df.to_parquet(ANALYTICS_DIR / "part-0000.parquet", index=False)
+        
+        print(f"[OK] Tahlillar yangilandi: {len(results)} ta qator")
         return True
     except Exception as e:
-        print(f"Analytics error: {e}")
+        print(f"Analytics Critical Error: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 @app.post("/api/sales")
@@ -320,17 +332,19 @@ async def get_sales_history():
 
 @app.get("/api/analytics")
 async def get_analytics():
-    # Agar tahlil hali yo'q bo'lsa, uni yaratishga harakat qilamiz
-    if not ANALYTICS_DIR.exists() or not any(ANALYTICS_DIR.iterdir()):
+    # Agar tahlil fayli yo'q bo'lsa, uni yaratishga harakat qilamiz
+    analytics_file = ANALYTICS_DIR / "analytics.json"
+    if not analytics_file.exists():
         run_analytics_task()
         
-    if not ANALYTICS_DIR.exists() or not any(ANALYTICS_DIR.iterdir()):
+    if not analytics_file.exists():
         return []
 
     try:
-        df = pd.read_parquet(ANALYTICS_DIR)
-        return df.fillna(0).to_dict(orient="records")
+        with open(analytics_file, "r", encoding="utf-8") as f:
+            return json.load(f)
     except Exception as e: 
+        print(f"Read analytics error: {e}")
         return []
 
 if __name__ == "__main__":

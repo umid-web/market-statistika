@@ -14,20 +14,38 @@ import {
 import { useStore } from '../context/StoreContext';
 
 const Analytics = () => {
-  const { analytics, fetchAnalytics } = useStore();
+  const { analytics, fetchAnalytics, addNotification } = useStore();
+  const [syncing, setSyncing] = React.useState(false);
   const data = Array.isArray(analytics) ? analytics : [];
   
   React.useEffect(() => {
     fetchAnalytics();
   }, []);
 
+  const handleSync = async () => {
+    try {
+      setSyncing(true);
+      await fetchAnalytics();
+      addNotification("Ma'lumotlar muvaffaqiyatli yangilandi", "success");
+    } catch (err) {
+      addNotification("Sinxronizatsiyada xatolik", "error");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   if (!data || data.length === 0) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '80vh', gap: '2rem' }}>
-        <div className="animate-spin" style={{ width: '50px', height: '50px', border: '3px solid rgba(212, 175, 55, 0.1)', borderTop: '3px solid #d4af37', borderRadius: '50%' }}></div>
+        <div className={syncing ? "animate-spin" : ""} style={{ width: '60px', height: '60px', border: '3px solid rgba(212, 175, 55, 0.1)', borderTop: '3px solid #d4af37', borderRadius: '50%' }}></div>
         <div style={{ textAlign: 'center' }}>
-          <h2 className="text-gradient-gold">Tahlillar tayyorlanmoqda...</h2>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Haqiqiy sotuvlar amalga oshirilishi bilan bu yerda tahlillar ko'rinadi.</p>
+          <h2 className="text-gradient-gold">Tahlillar yuklanmoqda...</h2>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', maxWidth: '400px', lineHeight: '1.6' }}>
+            Hali birorta ham sotuv qilinmagan bo'lishi mumkin yoki tahlil tizimi ma'lumotlarni qayta ishlayapti.
+          </p>
+          <button className="btn-premium" style={{ marginTop: '2rem' }} onClick={handleSync} disabled={syncing}>
+             <Zap size={18} /> {syncing ? "Yangilanmoqda..." : "Ma'lumotlarni Qayta Yuklash"}
+          </button>
         </div>
       </div>
     );
