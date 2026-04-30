@@ -89,8 +89,11 @@ async def update_settings(settings: dict):
 async def lock_windows_screen():
     import os
     if os.name == 'nt':
-        import ctypes
-        ctypes.windll.user32.LockWorkStation()
+        try:
+            import ctypes
+            ctypes.windll.user32.LockWorkStation()
+        except Exception:
+            pass  # Linux/Mac serverda ishlamaydi, xato chiqarmasin
     return {"status": "locked"}
 
 @app.post("/api/system/clear-database")
@@ -268,8 +271,11 @@ async def add_sale(payload: dict):
                 writer.writerow(row)
         with open(PRODUCTS_FILE, 'w', encoding='utf-8') as f:
             json.dump(products, f, ensure_ascii=False, indent=2)
-        base_dir = Path.cwd()
-        subprocess.Popen(["powershell", "-Command", f"& '{base_dir}/.venv/Scripts/python' '{base_dir}/src/bigdata_hadoop_spark_job.py' --input-path '{base_dir}/data/raw_orders/*.csv' --output-path '{base_dir}/data/output_analytics' --checkpoint-path '{base_dir}/data/temp/checkpoints'"])
+        # PySpark tahlili faqat lokal Windows muhitida ishlaydi
+        import os as _os
+        if _os.name == 'nt':
+            base_dir = Path.cwd()
+            subprocess.Popen(["powershell", "-Command", f"& '{base_dir}/.venv/Scripts/python' '{base_dir}/src/bigdata_hadoop_spark_job.py' --input-path '{base_dir}/data/raw_orders/*.csv' --output-path '{base_dir}/data/output_analytics' --checkpoint-path '{base_dir}/data/temp/checkpoints'"])
         return {"status": "ok", "order_id": order_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
