@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "npm run dev --prefix frontend-react",
+    "build": "npm run build --prefix frontend-react",
     "install-all": "npm install && npm install --prefix frontend-react"
   },
   "dependencies": {
