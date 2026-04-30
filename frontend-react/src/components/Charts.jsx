@@ -28,11 +28,15 @@ const Charts = ({ trendData, countryData }) => {
     return null;
   };
 
+  if (!trendData || trendData.length === 0) {
+    return <div className="glass-card" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>Ma'lumotlar yuklanmoqda...</div>;
+  }
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-      <div className="glass-card" style={{ height: '400px', display: 'flex', flexDirection: 'column' }}>
+      <div className="glass-card" style={{ height: '400px', display: 'flex', flexDirection: 'column', minWidth: '300px' }}>
         <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem', fontWeight: '700' }}>Daromad Trendi (Oylik)</h3>
-        <div style={{ flex: 1, minHeight: 0 }}>
+        <div style={{ flex: 1, minHeight: '300px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={trendData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -52,9 +56,9 @@ const Charts = ({ trendData, countryData }) => {
         </div>
       </div>
 
-      <div className="glass-card" style={{ height: '400px', display: 'flex', flexDirection: 'column' }}>
+      <div className="glass-card" style={{ height: '400px', display: 'flex', flexDirection: 'column', minWidth: '200px' }}>
         <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem', fontWeight: '700' }}>Top Maxsulotlar (Foyda)</h3>
-        <div style={{ flex: 1, minHeight: 0 }}>
+        <div style={{ flex: 1, minHeight: '300px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={countryData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
