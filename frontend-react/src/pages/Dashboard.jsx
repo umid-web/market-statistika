@@ -10,13 +10,11 @@ import axios from 'axios';
 import { API_BASE_URL } from '../api';
 
 const Dashboard = () => {
-  const { analytics, products, fetchAnalytics, loading } = useStore();
-  const [salesHistory, setSalesHistory] = React.useState([]);
+  const { analytics, products, salesHistory, fetchAnalytics, fetchSalesHistory, loading } = useStore();
 
   React.useEffect(() => {
-    axios.get(`${API_BASE_URL}/api/sales-history`)
-      .then(res => setSalesHistory(res.data))
-      .catch(err => console.error(err));
+    fetchAnalytics();
+    fetchSalesHistory();
   }, []);
 
   const totalRevenue = analytics.reduce((acc, curr) => acc + (curr.total_revenue || 0), 0);

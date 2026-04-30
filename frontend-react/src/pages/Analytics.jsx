@@ -14,7 +14,11 @@ import {
 import { useStore } from '../context/StoreContext';
 
 const Analytics = () => {
-  const { analytics: data } = useStore();
+  const { analytics: data, fetchAnalytics } = useStore();
+  
+  React.useEffect(() => {
+    fetchAnalytics();
+  }, []);
   const COLORS = ['#d4af37', '#00f2ff', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
 
   const categoryData = Object.entries(data.reduce((acc, curr) => {

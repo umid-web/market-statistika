@@ -6,25 +6,14 @@ import 'jspdf-autotable';
 
 import { API_BASE_URL } from '../api';
 
+import { useStore } from '../context/StoreContext';
+
 const Documents = () => {
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { salesHistory: history, loading } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilter, setShowFilter] = useState(false);
   const [dateFilter, setDateFilter] = useState('');
   const [selectedSale, setSelectedSale] = useState(null);
-
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/api/sales-history`);
-        setHistory(res.data.reverse());
-      } catch (err) {} finally {
-        setLoading(false);
-      }
-    };
-    fetchHistory();
-  }, []);
 
   const filteredHistory = history.filter(item => {
     const matchesSearch = item.order_id?.toString().toLowerCase().includes(searchTerm.toLowerCase()) || item.product_name?.toLowerCase().includes(searchTerm.toLowerCase());

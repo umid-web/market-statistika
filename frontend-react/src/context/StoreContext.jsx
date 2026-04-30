@@ -11,6 +11,7 @@ export const StoreProvider = ({ children }) => {
   const [user, setUser] = useState({ name: 'Admin', role: 'admin' });
   const [products, setProducts] = useState([]);
   const [analytics, setAnalytics] = useState([]);
+  const [salesHistory, setSalesHistory] = useState([]);
   const [cart, setCart] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [settings, setSettings] = useState({});
@@ -30,8 +31,16 @@ export const StoreProvider = ({ children }) => {
       const res = await axios.get(`${API_BASE_URL}/api/analytics`);
       setAnalytics(res.data);
     } catch (err) {
-      // Tahlillar hali tayyor bo'lmasligi mumkin, jim o'tamiz
       console.log("Analytics not ready yet");
+    }
+  };
+
+  const fetchSalesHistory = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/sales-history`);
+      setSalesHistory(res.data);
+    } catch (err) {
+      addNotification("Savdo tarixini yuklashda xatolik!", "error");
     }
   };
 
@@ -45,9 +54,9 @@ export const StoreProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchProducts();
-    fetchAnalytics();
-    fetchSettings();
+    setLoading(true);
+    Promise.all([fetchProducts(), fetchAnalytics(), fetchSalesHistory(), fetchSettings()])
+      .finally(() => setLoading(false));
   }, []);
 
   const addNotification = (text, type = 'success') => {
@@ -100,8 +109,8 @@ export const StoreProvider = ({ children }) => {
 
   return (
     <StoreContext.Provider value={{
-      user, setUser, products, analytics, cart, notifications, loading, settings,
-      fetchProducts, fetchAnalytics, fetchSettings, addNotification, addToCart, removeFromCart, clearCart, updateCartQuantity,
+      user, setUser, products, analytics, salesHistory, cart, notifications, loading, settings,
+      fetchProducts, fetchAnalytics, fetchSalesHistory, fetchSettings, addNotification, addToCart, removeFromCart, clearCart, updateCartQuantity,
       setLoading
     }}>
       {children}

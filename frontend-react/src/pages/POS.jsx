@@ -20,7 +20,7 @@ import { jsPDF } from 'jspdf';
 import { API_BASE_URL } from '../api';
 
 const POS = () => {
-  const { products, cart, addToCart, removeFromCart, clearCart, updateCartQuantity, addNotification, fetchProducts, fetchAnalytics } = useStore();
+  const { products, cart, addToCart, removeFromCart, clearCart, updateCartQuantity, addNotification, fetchProducts, fetchAnalytics, fetchSalesHistory } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentType, setPaymentType] = useState('cash');
   const [customers, setCustomers] = useState([]);
@@ -133,6 +133,7 @@ const POS = () => {
       clearCart();
       fetchProducts();
       fetchDailyStats();
+      fetchSalesHistory();
       
       // Spark job tugashini kutamiz va tahlillarni yangilaymiz
       setTimeout(() => {

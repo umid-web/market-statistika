@@ -4,22 +4,11 @@ import { Activity, Receipt, Calendar, DollarSign, ShoppingBag } from 'lucide-rea
 
 import { API_BASE_URL } from '../api';
 
-const Customers = () => {
-  const [salesHistory, setSalesHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState('all');
+import { useStore } from '../context/StoreContext';
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/api/sales-history`);
-        setSalesHistory(res.data);
-      } catch (err) {} finally {
-        setLoading(false);
-      }
-    };
-    fetchHistory();
-  }, []);
+const Customers = () => {
+  const { salesHistory, loading } = useStore();
+  const [filterType, setFilterType] = useState('all');
 
   const now = new Date();
   const isToday = (dStr) => {
