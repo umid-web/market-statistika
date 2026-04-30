@@ -18,6 +18,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "V-ERP Pro Backend is running"}
+
 # Yo'llar
 DATA_DIR = Path("data")
 PRODUCTS_FILE = DATA_DIR / "inventory" / "products.json"
