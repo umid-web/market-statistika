@@ -131,14 +131,12 @@ const POS = () => {
       addNotification("Sotuv muvaffaqiyatli!", "success");
       playBeep();
       clearCart();
+      
+      // Barcha ma'lumotlarni darhol yangilaymiz
       fetchProducts();
       fetchDailyStats();
       fetchSalesHistory();
-      
-      // Spark job tugashini kutamiz va tahlillarni yangilaymiz
-      setTimeout(() => {
-        fetchAnalytics();
-      }, 5000);
+      fetchAnalytics();
     } catch (err) {
       addNotification("Xatolik yuz berdi!", "error");
     }
