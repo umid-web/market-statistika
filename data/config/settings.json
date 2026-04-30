@@ -1,0 +1,13 @@
+{
+  "store_name": "V-ERP PRO STORE",
+  "currency": "UZS",
+  "address": "Farg'ona viloyati",
+  "admin_name": "Umidjon Tojimatov",
+  "admin_email": "umidjontojimatov742@gmail.com",
+  "lock_pin": "umidjon0528",
+  "cashier_pin": "0000",
+  "email_alerts": true,
+  "sms_alerts": true,
+  "tax_rate": "00",
+  "admin_panel_pin": "umidjon"
+}

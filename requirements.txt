@@ -1,0 +1,8 @@
+pyspark>=3.5.0
+streamlit
+pandas
+pyarrow
+plotly
+matplotlib
+fastapi
+uvicorn

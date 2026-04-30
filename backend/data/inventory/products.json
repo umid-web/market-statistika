@@ -1,0 +1,38 @@
+[
+  {
+    "name": "olma",
+    "sku": "kg",
+    "category": "Oziq-ovqat",
+    "brand": "",
+    "buy_price": 15000.0,
+    "sell_price": 20000.0,
+    "warehouse": "Do'kon Peshtaxtasi",
+    "stock": 7.0,
+    "min_stock": 5.0,
+    "barcode": "075275739105",
+    "id": 1777417371147
+  },
+  {
+    "name": "Test Product",
+    "sku": "TEST-001",
+    "category": "Elektronika",
+    "brand": "Test",
+    "buy_price": 1000.0,
+    "sell_price": 1500.0,
+    "warehouse": "Asosiy Ombor",
+    "stock": 6.0,
+    "min_stock": 5.0,
+    "barcode": "123456789012",
+    "id": 1777417462519
+  },
+  {
+    "name": "Olma",
+    "sku": "O1",
+    "category": "Oziq-ovqat",
+    "buy_price": 5000.0,
+    "sell_price": 8000.0,
+    "stock": 90.0,
+    "id": 1777506131900,
+    "min_stock": 5.0
+  }
+]

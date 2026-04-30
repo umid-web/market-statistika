@@ -1,0 +1,12 @@
+{
+  "store_name": "V-ERP PRO STORE",
+  "currency": "UZS",
+  "address": "Toshkent sh., Chilonzor",
+  "admin_name": "Admin",
+  "admin_email": "admin@v-erp.com",
+  "lock_pin": "1234",
+  "cashier_pin": "0000",
+  "email_alerts": false,
+  "sms_alerts": false,
+  "tax_rate": 0
+}
