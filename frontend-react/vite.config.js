@@ -9,7 +9,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://web-production-1d28d4.up.railway.app',
         changeOrigin: true,
         secure: false
       }
