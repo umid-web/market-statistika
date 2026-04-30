@@ -29,7 +29,15 @@ const Charts = ({ trendData, countryData }) => {
   };
 
   if (!trendData || trendData.length === 0) {
-    return <div className="glass-card" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>Ma'lumotlar yuklanmoqda...</div>;
+    return (
+      <div className="glass-card" style={{ height: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', textAlign: 'center', gap: '1rem' }}>
+        <RefreshCcw size={32} className="animate-spin" style={{ opacity: 0.2 }} />
+        <div>
+          <p style={{ fontWeight: '700', color: '#fff' }}>Sotuv ma'lumotlari tahlil qilinmoqda...</p>
+          <p style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>Hali sotuvlar amalga oshirilmagan yoki Spark tizimi ularni hisoblamoqda.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
