@@ -1,22 +1,5 @@
 order_id,product_name,category,sell_price,buy_price,quantity,order_date,customer_id,warehouse
-SOT-5617,Gilos,Oziq-ovqat,30000,20000,1,2026-04-28,MEHMON,Do'kon Peshtaxtasi
-SOT-0247,Kartoshka,Oziq-ovqat,7000,6000,2,2026-04-28,MEHMON,Do'kon Peshtaxtasi
-SOT-0247,Gilos,Oziq-ovqat,30000,20000,1,2026-04-28,MEHMON,Do'kon Peshtaxtasi
-SOT-0834,iphone 17 pro max,Elektronika,16000000,14000000,1,2026-04-28,MEHMON,2-Filial Ombori
-SOT-2052,iphone 17 pro max,Elektronika,16000000,14000000,1,2026-04-28,MEHMON,2-Filial Ombori
-SOT-28212641,iphone 17 pro max,Elektronika,16000000.0,14000000.0,1.0,2026-04-28,MEHMON,2-Filial Ombori
-SOT-28213842,Kartoshka,Oziq-ovqat,7000.0,6000.0,1.0,2026-04-28,MEHMON,Do'kon Peshtaxtasi
-SOT-28221010,fanta,Oziq-ovqat,19000.0,15000.0,2.0,2026-04-28,MEHMON,Do'kon Peshtaxtasi
-SOT-28221252,fanta,Oziq-ovqat,15000.0,13000.0,1.0,2026-04-28,MEHMON,Do'kon Peshtaxtasi
-SOT-28221252,Gilos,Oziq-ovqat,30000.0,20000.0,1.0,2026-04-28,MEHMON,Do'kon Peshtaxtasi
-SOT-30002819,Kartoshka,Oziq-ovqat,7000.0,6000.0,1.0,2026-04-30,MEHMON,Do'kon Peshtaxtasi
-SOT-30005020,fanta,Oziq-ovqat,15000.0,13000.0,2.0,2026-04-30,MEHMON,Do'kon Peshtaxtasi
-SOT-30011449,Gilos,Oziq-ovqat,30000.0,20000.0,1.0,2026-04-30,MEHMON,Do'kon Peshtaxtasi
-SOT-30011449,Kartoshka,Oziq-ovqat,7000.0,6000.0,3.0,2026-04-30,MEHMON,Do'kon Peshtaxtasi
-SOT-30020246,Kiryuvish mashinasi,Maishiy texnika,5700000.0,5000000.0,1.0,2026-04-30,MEHMON,Asosiy Ombor
-SOT-30020629,Kartoshka,Oziq-ovqat,7000.0,6000.0,1.0,2026-04-30,MEHMON,Do'kon Peshtaxtasi
-SOT-30020742,Kartoshka,Oziq-ovqat,7000.0,6000.0,1.0,2026-04-30,MEHMON,Do'kon Peshtaxtasi
-SOT-30020908,Erkaklar futbolkasi,Kiyim-kechak,150000.0,125000.0,4.0,2026-04-30,MEHMON,Do'kon Peshtaxtasi
-SOT-30021525,fanta,Oziq-ovqat,19000.0,15000.0,1.0,2026-04-30,MEHMON,Do'kon Peshtaxtasi
-SOT-30025942,fanta,Oziq-ovqat,15000.0,13000.0,1.0,2026-04-30,MEHMON,Do'kon Peshtaxtasi
-SOT-30092658,Gilos,Oziq-ovqat,30000.0,20000.0,1.0,2026-04-30 09:26:58,MEHMON,Do'kon Peshtaxtasi
+SOT-1001,iPhone 15 Pro,Smartfonlar,15000000,12000000,3,2026-04-30 18:56:52,MIJOZ-01,Asosiy Ombor
+SOT-1002,MacBook Air M2,Noutbuklar,18000000,15000000,2,2026-04-30 18:56:52,MIJOZ-02,Asosiy Ombor
+SOT-1003,iPad Pro M2,Planshetlar,12000000,10000000,4,2026-04-30 18:56:52,MIJOZ-03,Asosiy Ombor
+SOT-1004,AirPods Pro 2,Aksessuarlar,3000000,2200000,10,2026-04-30 18:56:52,MIJOZ-01,Asosiy Ombor

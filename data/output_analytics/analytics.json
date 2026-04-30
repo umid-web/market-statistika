@@ -1,0 +1,50 @@
+[
+  {
+    "order_month": "2026-04",
+    "product_name": "AirPods Pro 2",
+    "category": "Aksessuarlar",
+    "total_quantity": 10,
+    "total_revenue": 30000000,
+    "total_profit": 8000000,
+    "sales_count": 1,
+    "profit_rank": 1,
+    "prev_month_revenue": 0.0,
+    "growth_percent": 0.0
+  },
+  {
+    "order_month": "2026-04",
+    "product_name": "MacBook Air M2",
+    "category": "Noutbuklar",
+    "total_quantity": 2,
+    "total_revenue": 36000000,
+    "total_profit": 6000000,
+    "sales_count": 1,
+    "profit_rank": 1,
+    "prev_month_revenue": 0.0,
+    "growth_percent": 0.0
+  },
+  {
+    "order_month": "2026-04",
+    "product_name": "iPad Pro M2",
+    "category": "Planshetlar",
+    "total_quantity": 4,
+    "total_revenue": 48000000,
+    "total_profit": 8000000,
+    "sales_count": 1,
+    "profit_rank": 1,
+    "prev_month_revenue": 0.0,
+    "growth_percent": 0.0
+  },
+  {
+    "order_month": "2026-04",
+    "product_name": "iPhone 15 Pro",
+    "category": "Smartfonlar",
+    "total_quantity": 3,
+    "total_revenue": 45000000,
+    "total_profit": 9000000,
+    "sales_count": 1,
+    "profit_rank": 1,
+    "prev_month_revenue": 0.0,
+    "growth_percent": 0.0
+  }
+]
