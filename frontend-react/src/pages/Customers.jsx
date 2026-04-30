@@ -10,7 +10,7 @@ const Customers = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await axios.get('http://localhost:8000/api/sales-history');
+        const res = await axios.get('/api/sales-history');
         setSalesHistory(res.data);
       } catch (err) {} finally {
         setLoading(false);

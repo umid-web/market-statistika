@@ -14,21 +14,21 @@ export const StoreProvider = ({ children }) => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/products');
+      const res = await axios.get('/api/products');
       setProducts(res.data);
     } catch (err) {}
   };
 
   const fetchAnalytics = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/analytics');
+      const res = await axios.get('/api/analytics');
       setAnalytics(res.data);
     } catch (err) {}
   };
 
   const fetchSettings = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/settings');
+      const res = await axios.get('/api/settings');
       setSettings(res.data);
     } catch (err) {}
   };

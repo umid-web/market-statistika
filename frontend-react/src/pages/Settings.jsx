@@ -34,7 +34,7 @@ const Settings = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await axios.get('http://localhost:8000/api/settings');
+        const res = await axios.get('/api/settings');
         setSettings(res.data);
       } catch (err) {
         addNotification("Sozlamalarni yuklab bo'lmadi", "error");
@@ -47,7 +47,7 @@ const Settings = () => {
 
   const handleSave = async () => {
     try {
-      await axios.post('http://localhost:8000/api/settings', settings);
+      await axios.post('/api/settings', settings);
       addNotification("Sozlamalar muvaffaqiyatli saqlandi!", "success");
       if (fetchSettings) fetchSettings();
     } catch (err) {
@@ -58,7 +58,7 @@ const Settings = () => {
   const handleClearDB = async () => {
     if (!window.confirm("DIQQAT! Barcha ma'lumotlar (tovarlar, sotuvlar, mijozlar) o'chib ketadi. Rozimisiz?")) return;
     try {
-      await axios.post('http://localhost:8000/api/system/clear-database');
+      await axios.post('/api/system/clear-database');
       addNotification("Ma'lumotlar bazasi tozalandi!", "success");
       fetchProducts();
       fetchAnalytics();

@@ -15,7 +15,7 @@ const Documents = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await axios.get('http://localhost:8000/api/sales-history');
+        const res = await axios.get('/api/sales-history');
         setHistory(res.data.reverse());
       } catch (err) {} finally {
         setLoading(false);

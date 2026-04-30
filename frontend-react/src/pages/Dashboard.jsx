@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [salesHistory, setSalesHistory] = React.useState([]);
 
   React.useEffect(() => {
-    axios.get('http://localhost:8000/api/sales-history')
+    axios.get('/api/sales-history')
       .then(res => setSalesHistory(res.data))
       .catch(err => console.error(err));
   }, []);

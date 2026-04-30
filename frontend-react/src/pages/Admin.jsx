@@ -42,10 +42,10 @@ const Admin = () => {
     e.preventDefault();
     try {
       if (editingProduct) {
-        await axios.put(`http://localhost:8000/api/products/${editingProduct.id}`, newProduct);
+        await axios.put(`/api/products/${editingProduct.id}`, newProduct);
         addNotification("Maxsulot muvaffaqiyatli yangilandi!", "success");
       } else {
-        await axios.post('http://localhost:8000/api/products', newProduct);
+        await axios.post('/api/products', newProduct);
         addNotification("Maxsulot muvaffaqiyatli qo'shildi!", "success");
       }
       setNewProduct({ name: '', sku: '', category: 'Elektronika', brand: '', buy_price: '', sell_price: '', warehouse: 'Asosiy Ombor', stock: '', min_stock: '5', barcode: '', unit: 'dona' });
@@ -66,7 +66,7 @@ const Admin = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Haqiqatdan ham bu maxsulotni o'chirmoqchimisiz?")) return;
     try {
-      await axios.delete(`http://localhost:8000/api/products/${id}`);
+      await axios.delete(`/api/products/${id}`);
       addNotification("Maxsulot o'chirildi", "success");
       fetchProducts();
     } catch (err) {
@@ -77,7 +77,7 @@ const Admin = () => {
   const handleDeleteAll = async () => {
     if (!window.confirm("DIQQAT! Ombordagi BARCHA maxsulotlar to'liq o'chib ketadi. Buni tasdiqlaysizmi?")) return;
     try {
-      await axios.delete(`http://localhost:8000/api/products/all`);
+      await axios.delete(`/api/products/all`);
       addNotification("Barcha maxsulotlar to'liq o'chirildi!", "success");
       fetchProducts();
     } catch (err) {

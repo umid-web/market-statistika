@@ -29,7 +29,7 @@ const POS = () => {
 
   const fetchDailyStats = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/sales-history');
+      const res = await axios.get('/api/sales-history');
       const now = new Date();
       const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
       const todaySales = res.data.filter(s => s.order_date?.startsWith(today));
@@ -51,7 +51,7 @@ const POS = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const res = await axios.get('http://localhost:8000/api/customers');
+        const res = await axios.get('/api/customers');
         setCustomers(res.data);
       } catch (err) {}
     };
@@ -115,7 +115,7 @@ const POS = () => {
         }))
       };
       
-      const res = await axios.post('http://localhost:8000/api/sales', payload);
+      const res = await axios.post('/api/sales', payload);
       
       setReceiptData({
         order_id: res.data.order_id,
