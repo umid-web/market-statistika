@@ -1,14 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { StoreProvider, useStore } from './context/StoreContext';
 import Sidebar from './components/Sidebar';
-import Dashboard from './pages/Dashboard';
-import POS from './pages/POS';
-import Admin from './pages/Admin';
-import Documents from './pages/Documents';
-import Customers from './pages/Customers';
-import Analytics from './pages/Analytics';
-import Settings from './pages/Settings';
-import { AlertCircle, CheckCircle2, Info, X, Lock } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Lock } from 'lucide-react';
+
+// Lazy load pages for better performance and smaller initial bundle size
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const POS = lazy(() => import('./pages/POS'));
+const Admin = lazy(() => import('./pages/Admin'));
+const Documents = lazy(() => import('./pages/Documents'));
+const Customers = lazy(() => import('./pages/Customers'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Settings = lazy(() => import('./pages/Settings'));
+
+// Loading component for Suspense
+const PageLoader = () => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    height: '100%', 
+    width: '100%',
+    color: '#d4af37'
+  }}>
+    <div className="animate-spin" style={{ 
+      width: '40px', 
+      height: '40px', 
+      border: '3px solid rgba(212, 175, 55, 0.1)', 
+      borderTop: '3px solid #d4af37', 
+      borderRadius: '50%' 
+    }}></div>
+  </div>
+);
 
 const AppContent = () => {
   const [isAppLocked, setIsAppLocked] = useState(true);
@@ -35,7 +57,7 @@ const AppContent = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [activeTabState]);
 
-  const { notifications, settings, user, setUser } = useStore();
+  const { notifications, settings, setUser } = useStore();
   const adminPin = (settings?.lock_pin && String(settings.lock_pin).trim() !== '') ? String(settings.lock_pin).trim() : '1234';
   const cashierPin = (settings?.cashier_pin && String(settings.cashier_pin).trim() !== '') ? String(settings.cashier_pin).trim() : '0000';
 
@@ -108,7 +130,9 @@ const AppContent = () => {
       <Sidebar activeTab={activeTabState} setActiveTab={setActiveTab} />
       
       <main className="main-content">
-        {renderContent()}
+        <Suspense fallback={<PageLoader />}>
+          {renderContent()}
+        </Suspense>
       </main>
 
       {/* Notifications Portal */}
@@ -142,3 +166,4 @@ function App() {
 }
 
 export default App;
+
