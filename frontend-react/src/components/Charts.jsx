@@ -1,8 +1,8 @@
-import React from 'react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   BarChart, Bar, Cell, PieChart, Pie
 } from 'recharts';
+import { RefreshCcw } from 'lucide-react';
 
 const Charts = ({ trendData, countryData }) => {
   const COLORS = ['#d4af37', '#00f2ff', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
