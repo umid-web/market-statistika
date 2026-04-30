@@ -19,6 +19,16 @@ const Analytics = () => {
   React.useEffect(() => {
     fetchAnalytics();
   }, []);
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="page-container">
+        <div className="glass-card" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+          AI Tizim ma'lumotlarni tahlil qilmoqda... (Sales history bo'sh bo'lishi mumkin)
+        </div>
+      </div>
+    );
+  }
   const COLORS = ['#d4af37', '#00f2ff', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
 
   const categoryData = Object.entries(data.reduce((acc, curr) => {
