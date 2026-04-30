@@ -58,13 +58,15 @@ const AppContent = () => {
   }, [activeTabState]);
 
   const { notifications, settings, setUser } = useStore();
-  const adminPin = (settings?.lock_pin && String(settings.lock_pin).trim() !== '') ? String(settings.lock_pin).trim() : '1234';
-  const cashierPin = (settings?.cashier_pin && String(settings.cashier_pin).trim() !== '') ? String(settings.cashier_pin).trim() : '0000';
+  const adminPin = String(settings?.lock_pin || '').trim();
+  const cashierPin = String(settings?.cashier_pin || '').trim();
 
   const handleUnlock = (val) => {
     const inputVal = String(val).trim();
-    const isAdmin = inputVal === adminPin || inputVal === '1234';
-    const isCashier = !isAdmin && (inputVal === cashierPin || inputVal === '0000');
+    if (!inputVal) return;
+    
+    const isAdmin = adminPin !== '' && inputVal === adminPin;
+    const isCashier = !isAdmin && cashierPin !== '' && inputVal === cashierPin;
     if (isAdmin) {
       setUser({ name: 'Admin', role: 'admin' });
       setIsAppLocked(false);
