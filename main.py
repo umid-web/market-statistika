@@ -1,3 +1,7 @@
-# Railway/Railpack uchun entry point
-# backend/main.py FastAPI ilovasini ishga tushiradi
-from backend.main import app  # noqa: F401
+import uvicorn
+import os
+from backend.main import app
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
