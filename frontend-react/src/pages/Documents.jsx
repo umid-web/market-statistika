@@ -4,7 +4,7 @@ import { FileText, Printer, Download, Eye, Calendar, ShieldCheck, Search, Filter
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
-const API_BASE_URL = import.meta.env.PROD ? 'https://web-production-1d28d4.up.railway.app' : '';
+import { API_BASE_URL } from '../api';
 
 const Documents = () => {
   const [history, setHistory] = useState([]);

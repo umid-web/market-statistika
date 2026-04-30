@@ -4,9 +4,7 @@ import axios from 'axios';
 const StoreContext = createContext();
 
 // Backend manzili: Vercel-da bo'lganda haqiqiy Railway URL, lokalda esa nisbiy yo'l
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://web-production-1d28d4.up.railway.app' 
-  : '';
+import { API_BASE_URL } from '../api';
 
 
 export const StoreProvider = ({ children }) => {

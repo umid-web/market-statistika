@@ -17,7 +17,7 @@ import {
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
 
-const API_BASE_URL = import.meta.env.PROD ? 'https://web-production-1d28d4.up.railway.app' : '';
+import { API_BASE_URL } from '../api';
 
 const POS = () => {
   const { products, cart, addToCart, removeFromCart, clearCart, updateCartQuantity, addNotification, fetchProducts, fetchAnalytics } = useStore();

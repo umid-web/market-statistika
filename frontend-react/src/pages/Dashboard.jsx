@@ -7,7 +7,7 @@ import { useStore } from '../context/StoreContext';
 import { TrendingUp, Package, ShoppingCart, ArrowUpRight, ArrowDownRight, RefreshCcw, BrainCircuit, DollarSign, CalendarDays, CalendarRange, Calendar } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.PROD ? 'https://web-production-1d28d4.up.railway.app' : '';
+import { API_BASE_URL } from '../api';
 
 const Dashboard = () => {
   const { analytics, products, fetchAnalytics, loading } = useStore();

@@ -18,7 +18,7 @@ import {
   RefreshCcw
 } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.PROD ? 'https://web-production-1d28d4.up.railway.app' : '';
+import { API_BASE_URL } from '../api';
 
 const Admin = () => {
   const { fetchProducts, products, addNotification } = useStore();
