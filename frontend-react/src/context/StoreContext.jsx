@@ -3,6 +3,12 @@ import axios from 'axios';
 
 const StoreContext = createContext();
 
+// Backend manzili: Vercel-da bo'lganda haqiqiy Railway URL, lokalda esa nisbiy yo'l
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://web-production-1d28d4.up.railway.app' 
+  : '';
+
+
 export const StoreProvider = ({ children }) => {
   const [user, setUser] = useState({ name: 'Admin', role: 'admin' });
   const [products, setProducts] = useState([]);
@@ -14,21 +20,21 @@ export const StoreProvider = ({ children }) => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('/api/products');
+      const res = await axios.get(`${API_BASE_URL}/api/products`);
       setProducts(res.data);
     } catch (err) {}
   };
 
   const fetchAnalytics = async () => {
     try {
-      const res = await axios.get('/api/analytics');
+      const res = await axios.get(`${API_BASE_URL}/api/analytics`);
       setAnalytics(res.data);
     } catch (err) {}
   };
 
   const fetchSettings = async () => {
     try {
-      const res = await axios.get('/api/settings');
+      const res = await axios.get(`${API_BASE_URL}/api/settings`);
       setSettings(res.data);
     } catch (err) {}
   };

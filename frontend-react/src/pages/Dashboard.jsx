@@ -7,12 +7,14 @@ import { useStore } from '../context/StoreContext';
 import { TrendingUp, Package, ShoppingCart, ArrowUpRight, ArrowDownRight, RefreshCcw, BrainCircuit, DollarSign, CalendarDays, CalendarRange, Calendar } from 'lucide-react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.PROD ? 'https://web-production-1d28d4.up.railway.app' : '';
+
 const Dashboard = () => {
   const { analytics, products, fetchAnalytics, loading } = useStore();
   const [salesHistory, setSalesHistory] = React.useState([]);
 
   React.useEffect(() => {
-    axios.get('/api/sales-history')
+    axios.get(`${API_BASE_URL}/api/sales-history`)
       .then(res => setSalesHistory(res.data))
       .catch(err => console.error(err));
   }, []);

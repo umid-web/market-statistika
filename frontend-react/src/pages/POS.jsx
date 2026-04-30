@@ -17,6 +17,8 @@ import {
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
 
+const API_BASE_URL = import.meta.env.PROD ? 'https://web-production-1d28d4.up.railway.app' : '';
+
 const POS = () => {
   const { products, cart, addToCart, removeFromCart, clearCart, updateCartQuantity, addNotification, fetchProducts, fetchAnalytics } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,7 +31,7 @@ const POS = () => {
 
   const fetchDailyStats = async () => {
     try {
-      const res = await axios.get('/api/sales-history');
+      const res = await axios.get(`${API_BASE_URL}/api/sales-history`);
       const now = new Date();
       const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
       const todaySales = res.data.filter(s => s.order_date?.startsWith(today));
@@ -51,7 +53,7 @@ const POS = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const res = await axios.get('/api/customers');
+        const res = await axios.get(`${API_BASE_URL}/api/customers`);
         setCustomers(res.data);
       } catch (err) {}
     };
@@ -115,7 +117,7 @@ const POS = () => {
         }))
       };
       
-      const res = await axios.post('/api/sales', payload);
+      const res = await axios.post(`${API_BASE_URL}/api/sales`, payload);
       
       setReceiptData({
         order_id: res.data.order_id,

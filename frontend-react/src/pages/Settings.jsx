@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
+const API_BASE_URL = import.meta.env.PROD ? 'https://web-production-1d28d4.up.railway.app' : '';
+
 const Settings = () => {
   const { addNotification, fetchProducts, fetchAnalytics, fetchSettings } = useStore();
   const [settings, setSettings] = useState({
@@ -34,7 +36,7 @@ const Settings = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await axios.get('/api/settings');
+        const res = await axios.get(`${API_BASE_URL}/api/settings`);
         setSettings(res.data);
       } catch (err) {
         addNotification("Sozlamalarni yuklab bo'lmadi", "error");
@@ -47,7 +49,7 @@ const Settings = () => {
 
   const handleSave = async () => {
     try {
-      await axios.post('/api/settings', settings);
+      await axios.post(`${API_BASE_URL}/api/settings`, settings);
       addNotification("Sozlamalar muvaffaqiyatli saqlandi!", "success");
       if (fetchSettings) fetchSettings();
     } catch (err) {
@@ -58,7 +60,7 @@ const Settings = () => {
   const handleClearDB = async () => {
     if (!window.confirm("DIQQAT! Barcha ma'lumotlar (tovarlar, sotuvlar, mijozlar) o'chib ketadi. Rozimisiz?")) return;
     try {
-      await axios.post('/api/system/clear-database');
+      await axios.post(`${API_BASE_URL}/api/system/clear-database`);
       addNotification("Ma'lumotlar bazasi tozalandi!", "success");
       fetchProducts();
       fetchAnalytics();

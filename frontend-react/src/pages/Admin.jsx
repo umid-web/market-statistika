@@ -18,6 +18,8 @@ import {
   RefreshCcw
 } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.PROD ? 'https://web-production-1d28d4.up.railway.app' : '';
+
 const Admin = () => {
   const { fetchProducts, products, addNotification } = useStore();
   const [showAddForm, setShowAddForm] = useState(false);
@@ -42,10 +44,10 @@ const Admin = () => {
     e.preventDefault();
     try {
       if (editingProduct) {
-        await axios.put(`/api/products/${editingProduct.id}`, newProduct);
+        await axios.put(`${API_BASE_URL}/api/products/${editingProduct.id}`, newProduct);
         addNotification("Maxsulot muvaffaqiyatli yangilandi!", "success");
       } else {
-        await axios.post('/api/products', newProduct);
+        await axios.post(`${API_BASE_URL}/api/products`, newProduct);
         addNotification("Maxsulot muvaffaqiyatli qo'shildi!", "success");
       }
       setNewProduct({ name: '', sku: '', category: 'Elektronika', brand: '', buy_price: '', sell_price: '', warehouse: 'Asosiy Ombor', stock: '', min_stock: '5', barcode: '', unit: 'dona' });
@@ -66,7 +68,7 @@ const Admin = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Haqiqatdan ham bu maxsulotni o'chirmoqchimisiz?")) return;
     try {
-      await axios.delete(`/api/products/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/products/${id}`);
       addNotification("Maxsulot o'chirildi", "success");
       fetchProducts();
     } catch (err) {
@@ -77,7 +79,7 @@ const Admin = () => {
   const handleDeleteAll = async () => {
     if (!window.confirm("DIQQAT! Ombordagi BARCHA maxsulotlar to'liq o'chib ketadi. Buni tasdiqlaysizmi?")) return;
     try {
-      await axios.delete(`/api/products/all`);
+      await axios.delete(`${API_BASE_URL}/api/products/all`);
       addNotification("Barcha maxsulotlar to'liq o'chirildi!", "success");
       fetchProducts();
     } catch (err) {

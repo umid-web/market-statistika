@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Activity, Receipt, Calendar, DollarSign, ShoppingBag } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.PROD ? 'https://web-production-1d28d4.up.railway.app' : '';
+
 const Customers = () => {
   const [salesHistory, setSalesHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,7 +12,7 @@ const Customers = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await axios.get('/api/sales-history');
+        const res = await axios.get(`${API_BASE_URL}/api/sales-history`);
         setSalesHistory(res.data);
       } catch (err) {} finally {
         setLoading(false);
