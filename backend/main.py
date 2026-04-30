@@ -314,11 +314,8 @@ async def get_sales_history():
 
 @app.get("/api/analytics")
 async def get_analytics():
-    # Agar tahlil hali yo'q bo'lsa, uni yaratishga harakat qilamiz (Sinxron kutamiz)
+    # Agar tahlil hali yo'q bo'lsa, uni yaratishga harakat qilamiz
     if not ANALYTICS_DIR.exists() or not any(ANALYTICS_DIR.iterdir()):
-        import logging
-        logging.info("Analytics directory missing or empty. Running task...")
-        # Fallback pandas tahlilini sinxron ishga tushiramiz
         run_analytics_task()
         
     if not ANALYTICS_DIR.exists() or not any(ANALYTICS_DIR.iterdir()):
