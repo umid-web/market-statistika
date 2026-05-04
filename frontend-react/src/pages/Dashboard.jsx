@@ -1,82 +1,59 @@
 import React, { useEffect } from 'react';
 import Header from '../components/Header';
 import StatsGrid from '../components/StatsGrid';
+import Charts from '../components/Charts';
 import DataTable from '../components/DataTable';
 import { useStore } from '../context/StoreContext';
 import { TrendingUp, Package, ShoppingCart, ArrowUpRight, ArrowDownRight, RefreshCcw, BrainCircuit, DollarSign, CalendarDays, CalendarRange, Calendar } from 'lucide-react';
-import axios from 'axios';
-
-import { API_BASE_URL } from '../api';
 
 const Dashboard = () => {
-  const { analytics, products, salesHistory, fetchAnalytics, fetchSalesHistory, loading } = useStore();
+  const { 
+    products, 
+    orders, 
+    analytics, 
+    fetchProducts, 
+    fetchOrders, 
+    fetchAnalytics,
+    user
+  } = useStore();
 
-  React.useEffect(() => {
+  useEffect(() => {
+    fetchProducts();
+    fetchOrders();
     fetchAnalytics();
-    fetchSalesHistory();
   }, []);
 
-  const totalRevenue = analytics.reduce((acc, curr) => acc + (curr.total_revenue || 0), 0);
-
-  const now = new Date();
-  const isToday = (dStr) => {
-    const d = new Date(dStr);
-    return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  };
-  const isThisWeek = (dStr) => {
-    const diff = Math.abs(now - new Date(dStr));
-    return Math.ceil(diff / (1000*3600*24)) <= 7;
-  };
-  const isThisMonth = (dStr) => {
-    const d = new Date(dStr);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  };
-  const isThisYear = (dStr) => {
-    const d = new Date(dStr);
-    return d.getFullYear() === now.getFullYear();
-  };
-
-  const sumSales = (filterFn) => salesHistory.filter(s => filterFn(s.order_date)).reduce((acc, s) => acc + (s.sell_price * s.quantity), 0);
-
-  const dailyRev = sumSales(isToday);
-  const weeklyRev = sumSales(isThisWeek);
-  const monthlyRev = sumSales(isThisMonth);
-  const yearlyRev = sumSales(isThisYear);
+  // KPIs calculation
+  const totalRevenue = orders.reduce((acc, order) => acc + (order.total || 0), 0);
+  const totalOrders = orders.length;
+  const totalProducts = products.length;
+  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   const kpis = [
-    { label: 'Bugungi Tushum', value: dailyRev, icon: DollarSign, color: '#10b981', trend: '+15%' },
-    { label: 'Haftalik Tushum', value: weeklyRev, icon: CalendarDays, color: '#3b82f6', trend: '+5.2%' },
-    { label: 'Oylik Tushum', value: monthlyRev, icon: CalendarRange, color: '#8b5cf6', trend: '+12.1%' },
-    { label: 'Yillik Tushum', value: yearlyRev, icon: Calendar, color: '#d4af37', trend: '+24%' },
+    { title: "Jami Tushum", value: `${totalRevenue.toLocaleString()} so'm`, icon: DollarSign, trend: "+12.5%", color: "#10b981", bg: "rgba(16, 185, 129, 0.1)" },
+    { title: "Buyurtmalar", value: totalOrders.toLocaleString(), icon: ShoppingCart, trend: "+5.2%", color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },
+    { title: "Mahsulotlar", value: totalProducts.toLocaleString(), icon: Package, trend: "0.0%", color: "#d4af37", bg: "rgba(212, 175, 55, 0.1)" },
+    { title: "O'rtacha Chek", value: `${Math.round(avgOrderValue).toLocaleString()} so'm`, icon: TrendingUp, trend: "+2.1%", color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)" },
   ];
 
+  // Process data for charts
   const trendData = React.useMemo(() => {
-    if (!Array.isArray(analytics) || analytics.length === 0) return [];
-    
-    const trendMap = analytics.reduce((acc, curr) => {
-      const month = curr.order_month || 'Noma\'lum';
-      if (!acc[month]) acc[month] = { name: month, daromad: 0 };
-      acc[month].daromad += (curr.total_revenue || 0);
-      return acc;
-    }, {});
-
-    return Object.values(trendMap).sort((a, b) => a.name.localeCompare(b.name));
+    if (!analytics || analytics.length === 0) return [];
+    // Group by month
+    const monthly = {};
+    analytics.forEach(item => {
+      const m = item.order_month;
+      monthly[m] = (monthly[m] || 0) + item.total_revenue;
+    });
+    return Object.entries(monthly).map(([name, daromad]) => ({ name, daromad }));
   }, [analytics]);
 
   const productData = React.useMemo(() => {
-    if (!Array.isArray(analytics) || analytics.length === 0) return [];
-    
-    const productMap = analytics.reduce((acc, curr) => {
-      const name = curr.product_name || 'Noma\'lum';
-      if (!acc[name]) acc[name] = 0;
-      acc[name] += (curr.total_profit || 0);
-      return acc;
-    }, {});
-
-    return Object.entries(productMap)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 8);
+    if (!analytics || analytics.length === 0) return [];
+    return analytics
+      .sort((a, b) => b.total_profit - a.total_profit)
+      .slice(0, 5)
+      .map(item => ({ name: item.product_name, value: item.total_profit }));
   }, [analytics]);
 
   // Oylik o'sishni hisoblash (Growth Calculation)
@@ -112,7 +89,7 @@ const Dashboard = () => {
     }
     if (advices.length === 0) advices.push({ icon: '✨', text: 'AI Tizim ma\'lumotlarni tahlil qilmoqda. Savdo qiling va natijalarni kuting.' });
     return advices;
-  }, [products, productData, growthPercent, totalRevenue, trendData]);
+  }, [products, productData, growthPercent, trendData]);
 
   return (
     <div className="dashboard-view" style={{ animation: 'fadeIn 0.5s ease' }}>
@@ -147,74 +124,20 @@ const Dashboard = () => {
               borderRadius: '12px', 
               borderLeft: '4px solid #8b5cf6',
               fontSize: '0.9rem',
-              lineHeight: '1.5',
-              display: 'flex',
-              gap: '0.75rem',
-              alignItems: 'flex-start'
+              lineHeight: '1.5'
             }}>
-              <span style={{ fontSize: '1.2rem' }}>{adv.icon}</span>
-              <span style={{ color: '#e2e8f0' }}>{adv.text}</span>
+              {adv.icon} {adv.text}
             </div>
           ))}
         </div>
       </div>
-      
+
       <StatsGrid kpis={kpis} />
 
-      {/* Visual Analysis Section (Vercel Optimized) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div className="glass-card" style={{ padding: '1.5rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <TrendingUp size={20} color="#d4af37" /> Savdo Ulushi (Oylik)
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {trendData.length > 0 ? trendData.map((item, idx) => (
-              <div key={idx}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                  <span style={{ color: '#aaa' }}>{item.name}</span>
-                  <span style={{ fontWeight: '700' }}>{item.daromad.toLocaleString()} so'm</span>
-                </div>
-                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ 
-                    height: '100%', 
-                    width: `${Math.min((item.daromad / (totalRevenue || 1)) * 100, 100)}%`, 
-                    background: 'linear-gradient(90deg, #d4af37, #f59e0b)',
-                    boxShadow: '0 0 10px rgba(212, 175, 55, 0.3)'
-                  }}></div>
-                </div>
-              </div>
-            )) : (
-              <p style={{ color: '#666', fontSize: '0.85rem' }}>Ma'lumotlar tahlil qilinmoqda...</p>
-            )}
-          </div>
-        </div>
-
-        <div className="glass-card" style={{ padding: '1.5rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Package size={20} color="#00f2ff" /> Top Mahsulotlar (Foyda)
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {productData.length > 0 ? productData.map((item, idx) => (
-              <div key={idx}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                  <span style={{ color: '#aaa' }}>{item.name}</span>
-                  <span style={{ fontWeight: '700' }}>{item.value.toLocaleString()} so'm</span>
-                </div>
-                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ 
-                    height: '100%', 
-                    width: `${Math.min((item.value / (productData[0]?.value || 1)) * 100, 100)}%`, 
-                    background: 'linear-gradient(90deg, #00f2ff, #3b82f6)',
-                    boxShadow: '0 0 10px rgba(0, 242, 255, 0.3)'
-                  }}></div>
-                </div>
-              </div>
-            )) : (
-              <p style={{ color: '#666', fontSize: '0.85rem' }}>Mahsulotlar topilmadi...</p>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Visual Analysis Section (Restored Recharts) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+        <Charts trendData={trendData} countryData={productData} />
+        
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Tezkor Statistikalar</h3>
           
@@ -234,13 +157,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div style={{ padding: '1.25rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
-            <div style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Zaxira Tanqisligi</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: '800' }}>
-              {products.filter(p => p.stock <= 5).length} <small style={{fontSize: '0.8rem', color: '#666'}}>tovar</small>
-            </div>
-          </div>
-
           <div style={{ padding: '1.25rem', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '16px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#8b5cf6', fontWeight: '800', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
               <BrainCircuit size={16} /> AI Bashorati
@@ -248,10 +164,19 @@ const Dashboard = () => {
             <div style={{ fontSize: '1.75rem', fontWeight: '800' }}>
               +{Math.round(growthPercent > 0 ? totalRevenue * 1.15 : totalRevenue * 1.05).toLocaleString()} <small style={{fontSize: '0.8rem', color: '#666'}}>so'm</small>
             </div>
-            <div style={{ fontSize: '0.7rem', color: '#8b5cf6', marginTop: '0.4rem' }}>Keyingi oy kutilayotgan tushum (15% ehtimoliy o'sish)</div>
+            <div style={{ fontSize: '0.7rem', color: '#8b5cf6', marginTop: '0.4rem' }}>Keyingi oy kutilayotgan tushum (bashorat)</div>
           </div>
         </div>
       </div>
+
+      <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Oxirgi Tranzaksiyalar</h3>
+          <button className="btn-premium btn-ghost" style={{ fontSize: '0.8rem' }} onClick={() => window.navigateTo('archive')}>Hammasini Ko'rish</button>
+        </div>
+        <DataTable data={orders.slice(0, 5)} />
+      </div>
+    </div>
   );
 };
 
