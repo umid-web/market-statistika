@@ -105,7 +105,7 @@ const Dashboard = () => {
     }
     if (trendData.length > 1) {
       if (growthPercent > 0) {
-        advices.push({ icon: '📈', text: `Big Data Tahlili: Keyingi oyda ${Math.round(totalRevenue * 1.15).toLocaleString()} so'm kutilmoqda. Daromad o'smoqda!` });
+        advices.push({ icon: '📈', text: `Biznes Tahlili: Savdolar o'sish tendentsiyasida. Mijozlar oqimi ijobiy.` });
       } else {
         advices.push({ icon: '⚠️', text: `Marketing Tavsiyasi: Savdolar tempi tushgan. Mijozlarga SMS aksiya yuborishni o'ylab ko'ring.` });
       }

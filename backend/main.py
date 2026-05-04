@@ -90,26 +90,7 @@ def run_analytics_task():
             if row['prev_month_revenue'] == 0: return 0.0
             return round(((row['total_revenue'] - row['prev_month_revenue']) / row['prev_month_revenue']) * 100, 1)
         
-        agg_df['growth_percent'] = agg_df.apply(calc_growth, axis=1)
-
-        # --- FORECASTING (S(t) = S0 * e^(kt)) ---
-        def calculate_forecast(row):
-            s_curr = row['total_revenue']
-            s_prev = row['prev_month_revenue']
-            
-            # Agar o'tgan oydagi ma'lumot bo'lsa, Differentsial tenglama ishlaydi
-            if s_prev > 0 and s_curr > 0:
-                # k = ln(S_curr / S_prev)
-                k = np.log(s_curr / s_prev)
-                # S_forecast = S_curr * e^k
-                return round(s_curr * np.exp(k), 2)
-            
-            # Agar faqat 1 oylik ma'lumot bo'lsa, 8% ehtimoliy o'sishni bashorat qilamiz (AI logic)
-            return round(s_curr * 1.08, 2)
-
-        agg_df['forecasted_revenue'] = agg_df.apply(calculate_forecast, axis=1)
-        
-        # O'sish foizi
+        # O'sish foizi (Simple growth)
         agg_df['growth_percent'] = 0.0
         mask = agg_df['prev_month_revenue'] > 0
         agg_df.loc[mask, 'growth_percent'] = ((agg_df['total_revenue'] - agg_df['prev_month_revenue']) / agg_df['prev_month_revenue'] * 100).round(1)
