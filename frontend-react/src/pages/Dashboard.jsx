@@ -9,23 +9,23 @@ import { TrendingUp, Package, ShoppingCart, ArrowUpRight, ArrowDownRight, Refres
 const Dashboard = () => {
   const { 
     products, 
-    orders, 
+    salesHistory, 
     analytics, 
     fetchProducts, 
-    fetchOrders, 
+    fetchSalesHistory, 
     fetchAnalytics,
     user
   } = useStore();
 
   useEffect(() => {
     fetchProducts();
-    fetchOrders();
+    fetchSalesHistory();
     fetchAnalytics();
   }, []);
 
   // KPIs calculation
-  const totalRevenue = (orders || []).reduce((acc, order) => acc + (order.total || 0), 0);
-  const totalOrders = (orders || []).length;
+  const totalRevenue = (salesHistory || []).reduce((acc, order) => acc + (order.total || 0), 0);
+  const totalOrders = (salesHistory || []).length;
   const totalProducts = (products || []).length;
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
@@ -185,7 +185,7 @@ const Dashboard = () => {
           <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Oxirgi Tranzaksiyalar</h3>
           <button className="btn-premium btn-ghost" style={{ fontSize: '0.8rem' }} onClick={() => window.navigateTo('archive')}>Hammasini Ko'rish</button>
         </div>
-        <DataTable data={(orders || []).slice(0, 5)} />
+        <DataTable data={(salesHistory || []).slice(0, 5)} />
       </div>
     </div>
   );
