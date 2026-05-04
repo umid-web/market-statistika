@@ -2,17 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { 
   Database, Zap, FileSpreadsheet, RefreshCcw, Download, BrainCircuit, Package, TrendingUp, ArrowUpRight, BarChart3, Clock, Cpu
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import { useStore } from '../context/StoreContext';
 
 const Analytics = () => {
   const { analytics, fetchAnalytics, addNotification, loading } = useStore();
   const [syncing, setSyncing] = useState(false);
   
+  // Ma'lumotlarni xavfsiz yuklash
   const data = Array.isArray(analytics) ? analytics : [];
 
   useEffect(() => {
-    fetchAnalytics();
+    const loadData = async () => {
+      try {
+        await fetchAnalytics();
+      } catch (err) {
+        console.error("Analytics fetch error:", err);
+      }
+    };
+    loadData();
   }, []);
 
   const handleSync = async () => {
@@ -27,16 +34,24 @@ const Analytics = () => {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (data.length === 0) {
       addNotification("Eksport uchun ma'lumot yo'q", "error");
       return;
     }
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Analytics");
-    XLSX.writeFile(workbook, "Enterprise_Analytics_Report.xlsx");
-    addNotification("Excel hisoboti tayyor!", "success");
+    
+    try {
+      // xlsx kutubxonasini dinamik yuklash (build xatosini oldini olish uchun)
+      const XLSX = await import('xlsx');
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Analytics");
+      XLSX.writeFile(workbook, "Enterprise_Analytics_Report.xlsx");
+      addNotification("Excel hisoboti tayyor!", "success");
+    } catch (err) {
+      console.error("Export error:", err);
+      addNotification("Eksportda xatolik yuz berdi", "error");
+    }
   };
 
   const totalRevenue = data.reduce((acc, curr) => acc + (Number(curr.total_revenue) || 0), 0);
@@ -98,8 +113,8 @@ const Analytics = () => {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ color: '#10b981', fontWeight: '900', fontSize: '1.1rem' }}>{item.total_revenue.toLocaleString()} <small>UZS</small></div>
-                    <div style={{ color: item.growth_percent >= 0 ? '#10b981' : '#ef4444', fontSize: '0.8rem', fontWeight: '800' }}>
-                      {item.growth_percent >= 0 ? '+' : ''}{item.growth_percent}%
+                    <div style={{ color: (Number(item.growth_percent) || 0) >= 0 ? '#10b981' : '#ef4444', fontSize: '0.8rem', fontWeight: '800' }}>
+                      {(Number(item.growth_percent) || 0) >= 0 ? '+' : ''}{item.growth_percent}%
                     </div>
                   </div>
                 </div>
@@ -131,7 +146,7 @@ const Analytics = () => {
               <div key={idx} style={{ padding: '1rem', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '12px', borderLeft: '4px solid #8b5cf6' }}>
                 <div style={{ fontSize: '0.9rem', fontWeight: '800', color: '#fff', marginBottom: '0.5rem' }}>{item.product_name}</div>
                 <div style={{ fontSize: '0.8rem', color: '#aaa', lineHeight: '1.6' }}>
-                  {item.growth_percent > 10 
+                  {(Number(item.growth_percent) || 0) > 10 
                     ? "Ushbu mahsulot savdosi tez o'smoqda. Zaxirani 25% ga oshirish tavsiya etiladi." 
                     : "Sotuvlar barqaror. Marketing kampaniyasi orqali tushumni 15% ga oshirish imkoniyati mavjud."}
                 </div>
@@ -139,16 +154,6 @@ const Analytics = () => {
             )) : (
               <p style={{ color: '#666', fontStyle: 'italic' }}>AI hozirda ma'lumotlarni tahlil qilmoqda...</p>
             )}
-            <div style={{ marginTop: 'auto', padding: '1rem', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px solid rgba(212, 175, 55, 0.1)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <Zap size={16} color="#d4af37" />
-                <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#d4af37' }}>TIZIM XOLATI</span>
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#888' }}>
-                Spark ishlov berish tezligi: 12.4ms/row<br />
-                Hadoop klaster holati: ONLINE
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -175,39 +180,19 @@ const Analytics = () => {
                 <th>Sotuv</th>
                 <th>Tushum</th>
                 <th>O'sish</th>
-                <th>Holat</th>
               </tr>
             </thead>
             <tbody>
               {data.map((row, idx) => (
                 <tr key={idx} className="row-hover">
-                  <td>
-                    <div style={{ 
-                      width: '28px', height: '28px', borderRadius: '50%', 
-                      background: idx < 3 ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.05)',
-                      color: idx < 3 ? '#d4af37' : '#888',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '0.8rem'
-                    }}>
-                      {idx + 1}
-                    </div>
-                  </td>
+                  <td>{idx + 1}</td>
                   <td style={{ fontWeight: '800', color: '#fff' }}>{row.product_name}</td>
                   <td>{row.order_month}</td>
-                  <td>
-                    <span style={{ padding: '4px 10px', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', borderRadius: '12px', fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase' }}>
-                      {row.category}
-                    </span>
-                  </td>
-                  <td style={{ fontWeight: '700' }}>{row.total_quantity}</td>
-                  <td style={{ fontWeight: '900', color: '#10b981' }}>{row.total_revenue?.toLocaleString()}</td>
-                  <td style={{ color: (row.growth_percent || 0) >= 0 ? '#10b981' : '#ef4444', fontWeight: '900' }}>
-                    {row.growth_percent > 0 ? '+' : ''}{row.growth_percent}%
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontSize: '0.75rem', fontWeight: '800' }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }}></div>
-                      SYNCED
-                    </div>
+                  <td>{row.category}</td>
+                  <td>{row.total_quantity}</td>
+                  <td style={{ fontWeight: '900', color: '#10b981' }}>{Number(row.total_revenue || 0).toLocaleString()}</td>
+                  <td style={{ color: (Number(row.growth_percent) || 0) >= 0 ? '#10b981' : '#ef4444', fontWeight: '900' }}>
+                    {(Number(row.growth_percent) || 0) > 0 ? '+' : ''}{row.growth_percent}%
                   </td>
                 </tr>
               ))}
