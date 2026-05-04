@@ -204,17 +204,18 @@ async def get_sales_history():
 async def get_analytics():
     from fastapi.responses import JSONResponse
     
-    # Har doim eng yangi ma'lumotni hisoblashga harakat qilamiz
-    run_analytics_task()
-    
-    if not ANALYTICS_FILE.exists():
-        return JSONResponse(content=[], headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
-
     try:
+        # Har doim eng yangi ma'lumotni hisoblashga harakat qilamiz
+        run_analytics_task()
+        
+        if not ANALYTICS_FILE.exists():
+            return JSONResponse(content=[], headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+
         with open(ANALYTICS_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
             return JSONResponse(content=data, headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
-    except:
+    except Exception as e:
+        print(f"API Analytics Error: {e}")
         return JSONResponse(content=[], headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
 
 @app.get("/api/settings")

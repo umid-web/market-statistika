@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { 
-  Database, Server, Cpu, Zap, FileSpreadsheet, ArrowUpRight, RefreshCcw, Download, TrendingUp, BrainCircuit 
+  Database, Server, Cpu, Zap, FileSpreadsheet, ArrowUpRight, RefreshCcw, Download, TrendingUp, BrainCircuit, Package
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useStore } from '../context/StoreContext';
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, Legend, BarChart, Bar
-} from 'recharts';
 
 const Analytics = () => {
   const { analytics, fetchAnalytics, addNotification } = useStore();
@@ -38,13 +35,6 @@ const Analytics = () => {
     addNotification("Excel hisoboti tayyor!", "success");
   };
 
-  // Chart ma'lumotlarini tayyorlash
-  const chartData = data.slice(0, 6).map(item => ({
-    name: item.product_name.substring(0, 8),
-    Hozirgi: item.total_revenue,
-    Bashorat: item.forecasted_revenue
-  }));
-
   return (
     <div className="analytics-view" style={{ animation: 'fadeIn 0.5s ease', paddingBottom: '2rem' }}>
       {/* Header */}
@@ -69,34 +59,35 @@ const Analytics = () => {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-        {/* Forecast Chart */}
+        {/* Visual Prediction List */}
         <div className="glass-card" style={{ padding: '1.5rem', minHeight: '350px' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <TrendingUp size={20} color="#d4af37" /> S(t) Bashorat Grafiklari (Real vs Forecast)
+            <Zap size={20} color="#d4af37" /> S(t) Bashorat Analizi (Product-wise)
           </h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorH" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#d4af37" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#d4af37" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorB" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-              <XAxis dataKey="name" stroke="#888" fontSize={10} axisLine={false} tickLine={false} />
-              <YAxis hide />
-              <Tooltip 
-                contentStyle={{ background: '#0a0e14', border: '1px solid #d4af37', borderRadius: '8px' }}
-                itemStyle={{ fontSize: '0.8rem' }}
-              />
-              <Area type="monotone" dataKey="Hozirgi" stroke="#d4af37" fillOpacity={1} fill="url(#colorH)" />
-              <Area type="monotone" dataKey="Bashorat" stroke="#10b981" fillOpacity={1} fill="url(#colorB)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {data.slice(0, 5).map((item, idx) => (
+              <div key={idx} style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ width: '32px', height: '32px', background: 'rgba(212,175,55,0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>📦</div>
+                    <span style={{ fontWeight: '700' }}>{item.product_name}</span>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#888' }}>Kutilayotgan Tushum</div>
+                    <div style={{ color: '#10b981', fontWeight: '800' }}>{item.forecasted_revenue.toLocaleString()} so'm</div>
+                  </div>
+                </div>
+                <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    height: '100%', 
+                    width: `${Math.min((item.total_revenue / item.forecasted_revenue) * 100, 100)}%`, 
+                    background: 'linear-gradient(90deg, #d4af37, #10b981)',
+                    boxShadow: '0 0 10px rgba(16, 185, 129, 0.2)'
+                  }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* AI Strategic Insights */}

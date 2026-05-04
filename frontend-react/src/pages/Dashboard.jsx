@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import Header from '../components/Header';
 import StatsGrid from '../components/StatsGrid';
-import Charts from '../components/Charts';
 import DataTable from '../components/DataTable';
 import { useStore } from '../context/StoreContext';
 import { TrendingUp, Package, ShoppingCart, ArrowUpRight, ArrowDownRight, RefreshCcw, BrainCircuit, DollarSign, CalendarDays, CalendarRange, Calendar } from 'lucide-react';
@@ -51,33 +50,49 @@ const Dashboard = () => {
     { label: 'Yillik Tushum', value: yearlyRev, icon: Calendar, color: '#d4af37', trend: '+24%' },
   ];
 
-  const trendData = Object.values(analytics.reduce((acc, curr) => {
-    const month = curr.order_month;
-    if (!acc[month]) acc[month] = { name: month, daromad: 0 };
-    acc[month].daromad += curr.total_revenue;
-    return acc;
-  }, {})).sort((a, b) => a.name.localeCompare(b.name));
+  const trendData = React.useMemo(() => {
+    if (!Array.isArray(analytics) || analytics.length === 0) return [];
+    
+    const trendMap = analytics.reduce((acc, curr) => {
+      const month = curr.order_month || 'Noma\'lum';
+      if (!acc[month]) acc[month] = { name: month, daromad: 0 };
+      acc[month].daromad += (curr.total_revenue || 0);
+      return acc;
+    }, {});
+
+    return Object.values(trendMap).sort((a, b) => a.name.localeCompare(b.name));
+  }, [analytics]);
+
+  const productData = React.useMemo(() => {
+    if (!Array.isArray(analytics) || analytics.length === 0) return [];
+    
+    const productMap = analytics.reduce((acc, curr) => {
+      const name = curr.product_name || 'Noma\'lum';
+      if (!acc[name]) acc[name] = 0;
+      acc[name] += (curr.total_profit || 0);
+      return acc;
+    }, {});
+
+    return Object.entries(productMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+  }, [analytics]);
 
   // Oylik o'sishni hisoblash (Growth Calculation)
-  let growthPercent = 0;
-  let growthColor = '#10b981';
-  if (trendData.length >= 2) {
-    const currentMonth = trendData[trendData.length - 1].daromad;
-    const prevMonth = trendData[trendData.length - 2].daromad;
-    if (prevMonth > 0) {
-      growthPercent = ((currentMonth - prevMonth) / prevMonth) * 100;
-      growthColor = growthPercent >= 0 ? '#10b981' : '#ef4444';
+  const { growthPercent, growthColor } = React.useMemo(() => {
+    let percent = 0;
+    let color = '#10b981';
+    if (trendData.length >= 2) {
+      const currentMonth = trendData[trendData.length - 1].daromad;
+      const prevMonth = trendData[trendData.length - 2].daromad;
+      if (prevMonth > 0) {
+        percent = ((currentMonth - prevMonth) / prevMonth) * 100;
+        color = percent >= 0 ? '#10b981' : '#ef4444';
+      }
     }
-  }
-
-  const productData = Object.entries(analytics.reduce((acc, curr) => {
-    if (!acc[curr.product_name]) acc[curr.product_name] = 0;
-    acc[curr.product_name] += curr.total_profit;
-    return acc;
-  }, {}))
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 8);
+    return { growthPercent: percent, growthColor: color };
+  }, [trendData]);
 
   const aiAdvices = React.useMemo(() => {
     let advices = [];
@@ -146,9 +161,60 @@ const Dashboard = () => {
       
       <StatsGrid kpis={kpis} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-        <Charts trendData={trendData} countryData={productData} />
-        
+      {/* Visual Analysis Section (Vercel Optimized) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div className="glass-card" style={{ padding: '1.5rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <TrendingUp size={20} color="#d4af37" /> Savdo Ulushi (Oylik)
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {trendData.length > 0 ? trendData.map((item, idx) => (
+              <div key={idx}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                  <span style={{ color: '#aaa' }}>{item.name}</span>
+                  <span style={{ fontWeight: '700' }}>{item.daromad.toLocaleString()} so'm</span>
+                </div>
+                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    height: '100%', 
+                    width: `${Math.min((item.daromad / (totalRevenue || 1)) * 100, 100)}%`, 
+                    background: 'linear-gradient(90deg, #d4af37, #f59e0b)',
+                    boxShadow: '0 0 10px rgba(212, 175, 55, 0.3)'
+                  }}></div>
+                </div>
+              </div>
+            )) : (
+              <p style={{ color: '#666', fontSize: '0.85rem' }}>Ma'lumotlar tahlil qilinmoqda...</p>
+            )}
+          </div>
+        </div>
+
+        <div className="glass-card" style={{ padding: '1.5rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Package size={20} color="#00f2ff" /> Top Mahsulotlar (Foyda)
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {productData.length > 0 ? productData.map((item, idx) => (
+              <div key={idx}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                  <span style={{ color: '#aaa' }}>{item.name}</span>
+                  <span style={{ fontWeight: '700' }}>{item.value.toLocaleString()} so'm</span>
+                </div>
+                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    height: '100%', 
+                    width: `${Math.min((item.value / (productData[0]?.value || 1)) * 100, 100)}%`, 
+                    background: 'linear-gradient(90deg, #00f2ff, #3b82f6)',
+                    boxShadow: '0 0 10px rgba(0, 242, 255, 0.3)'
+                  }}></div>
+                </div>
+              </div>
+            )) : (
+              <p style={{ color: '#666', fontSize: '0.85rem' }}>Mahsulotlar topilmadi...</p>
+            )}
+          </div>
+        </div>
+      </div>
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Tezkor Statistikalar</h3>
           

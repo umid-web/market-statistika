@@ -27,14 +27,15 @@ export const StoreProvider = ({ children }) => {
   };
 
   const fetchAnalytics = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await axios.get(`${API_BASE_URL}/api/analytics`);
       if (Array.isArray(res.data)) {
         setAnalytics(res.data);
       }
     } catch (err) {
       console.error("Analytics fetch error:", err);
+      setAnalytics([]); // Error bo'lganda bo'sh massiv qaytaramiz
     } finally {
       setLoading(false);
     }
