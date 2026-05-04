@@ -1,5 +1,4 @@
 import React from 'react';
-import { DollarSign, TrendingUp, ShoppingBag, Activity } from 'lucide-react';
 
 const StatsGrid = ({ kpis }) => {
   return (
@@ -8,7 +7,7 @@ const StatsGrid = ({ kpis }) => {
         <div key={idx} className="glass-card stat-item">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
             <div style={{ 
-              background: `${kpi.color}20`, 
+              background: kpi.bg || `${kpi.color}20`, 
               padding: '0.75rem', 
               borderRadius: '14px',
               display: 'flex',
@@ -28,10 +27,10 @@ const StatsGrid = ({ kpis }) => {
               {kpi.trend}
             </div>
           </div>
-          <div className="stat-label">{kpi.label}</div>
-          <div className="stat-value" style={{ color: idx === 1 ? '#10b981' : 'white' }}>
-            {Math.round(Number(kpi.value || 0)).toLocaleString()} 
-            {idx !== 2 && <small style={{ fontSize: '0.9rem', marginLeft: '0.4rem', color: 'var(--text-secondary)' }}>so'm</small>}
+          <div className="stat-label" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600' }}>{kpi.title}</div>
+          <div className="stat-value" style={{ color: 'white', marginTop: '0.5rem', display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
+            {kpi.value} 
+            {kpi.unit && <small style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{kpi.unit}</small>}
           </div>
         </div>
       ))}

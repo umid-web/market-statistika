@@ -24,16 +24,16 @@ const Dashboard = () => {
   }, []);
 
   // KPIs calculation
-  const totalRevenue = (salesHistory || []).reduce((acc, order) => acc + (order.total || 0), 0);
+  const totalRevenue = (salesHistory || []).reduce((acc, order) => acc + (Number(order.total) || 0), 0);
   const totalOrders = (salesHistory || []).length;
   const totalProducts = (products || []).length;
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   const kpis = [
-    { title: "Jami Tushum", value: `${totalRevenue.toLocaleString()} so'm`, icon: DollarSign, trend: "+12.5%", color: "#10b981", bg: "rgba(16, 185, 129, 0.1)" },
-    { title: "Buyurtmalar", value: totalOrders.toLocaleString(), icon: ShoppingCart, trend: "+5.2%", color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },
-    { title: "Mahsulotlar", value: totalProducts.toLocaleString(), icon: Package, trend: "0.0%", color: "#d4af37", bg: "rgba(212, 175, 55, 0.1)" },
-    { title: "O'rtacha Chek", value: `${Math.round(avgOrderValue).toLocaleString()} so'm`, icon: TrendingUp, trend: "+2.1%", color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)" },
+    { title: "Jami Tushum", value: `${totalRevenue.toLocaleString()}`, unit: "so'm", icon: DollarSign, trend: "+12.5%", color: "#10b981", bg: "rgba(16, 185, 129, 0.1)" },
+    { title: "Buyurtmalar", value: totalOrders.toLocaleString(), unit: "ta", icon: ShoppingCart, trend: "+5.2%", color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },
+    { title: "Mahsulotlar", value: totalProducts.toLocaleString(), unit: "tur", icon: Package, trend: "0.0%", color: "#d4af37", bg: "rgba(212, 175, 55, 0.1)" },
+    { title: "O'rtacha Chek", value: `${Math.round(avgOrderValue).toLocaleString()}`, unit: "so'm", icon: TrendingUp, trend: "+2.1%", color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)" },
   ];
 
   // Process data for charts
