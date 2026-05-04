@@ -185,7 +185,7 @@ const Dashboard = () => {
           <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Oxirgi Tranzaksiyalar</h3>
           <button className="btn-premium btn-ghost" style={{ fontSize: '0.8rem' }} onClick={() => window.navigateTo('archive')}>Hammasini Ko'rish</button>
         </div>
-        <DataTable data={orders.slice(0, 5)} />
+        <DataTable data={(orders || []).slice(0, 5)} />
       </div>
     </div>
   );
