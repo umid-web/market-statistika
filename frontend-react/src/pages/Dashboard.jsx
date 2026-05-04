@@ -24,9 +24,9 @@ const Dashboard = () => {
   }, []);
 
   // KPIs calculation
-  const totalRevenue = orders.reduce((acc, order) => acc + (order.total || 0), 0);
-  const totalOrders = orders.length;
-  const totalProducts = products.length;
+  const totalRevenue = (orders || []).reduce((acc, order) => acc + (order.total || 0), 0);
+  const totalOrders = (orders || []).length;
+  const totalProducts = (products || []).length;
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   const kpis = [
@@ -164,7 +164,7 @@ const Dashboard = () => {
           <div style={{ padding: '1.25rem', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '16px', border: '1px solid rgba(212, 175, 55, 0.1)' }}>
             <div style={{ fontSize: '0.8rem', color: '#d4af37', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Ombor Qiymati</div>
             <div style={{ fontSize: '1.75rem', fontWeight: '800' }}>
-              {products.reduce((acc, p) => acc + (Number(p.buy_price || 0) * Number(p.stock || 0)), 0).toLocaleString()} <small style={{fontSize: '0.8rem', color: '#666'}}>so'm</small>
+              {(products || []).reduce((acc, p) => acc + (Number(p.buy_price || 0) * Number(p.stock || 0)), 0).toLocaleString()} <small style={{fontSize: '0.8rem', color: '#666'}}>so'm</small>
             </div>
           </div>
 
