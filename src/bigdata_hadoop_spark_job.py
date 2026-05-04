@@ -38,9 +38,17 @@ def run_analytics_with_pandas(input_path, output_path):
         # 5. Reyting va Dinamika (Window functions muqobili)
         agg_df['profit_rank'] = agg_df.groupby(['order_month', 'category'])['total_profit'].rank(ascending=False, method='min')
         
-        # O'sish dinamikasi
-        agg_df = agg_df.sort_values(['product_name', 'order_month'])
-        agg_df['prev_month_revenue'] = agg_df.groupby('product_name')['total_revenue'].shift(1)
+        import numpy as np
+        agg_df['prev_month_revenue'] = agg_df.groupby('product_name')['total_revenue'].shift(1).fillna(0)
+        
+        def calculate_forecast(row):
+            s_curr = row['total_revenue']
+            s_prev = row['prev_month_revenue']
+            if s_prev <= 0 or s_curr <= 0: return s_curr
+            k = np.log(s_curr / s_prev)
+            return round(s_curr * np.exp(k), 2)
+
+        agg_df['forecasted_revenue'] = agg_df.apply(calculate_forecast, axis=1)
         agg_df['growth_percent'] = ((agg_df['total_revenue'] - agg_df['prev_month_revenue']) / agg_df['prev_month_revenue'] * 100).fillna(0)
 
         # 6. Saqlash (Parquet formatida)

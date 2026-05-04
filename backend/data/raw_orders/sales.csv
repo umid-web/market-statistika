@@ -1,3 +1,14 @@
 order_id,product_name,category,sell_price,buy_price,quantity,order_date,customer_id,warehouse
-SOT-29234213,Olma,Oziq-ovqat,8000.0,5000.0,10.0,2026-04-29,MEHMON,Asosiy Ombor
-SOT-30170923,Olma,Oziq-ovqat,8000.0,5000.0,1.0,2026-04-30 17:09:23,MEHMON,Asosiy Ombor
+SOT-1001,iPhone 15 Pro,Smartfonlar,15000000,12000000,3,2026-04-30 18:56:52,MIJOZ-01,Asosiy Ombor
+SOT-1002,MacBook Air M2,Noutbuklar,18000000,15000000,2,2026-04-30 18:56:52,MIJOZ-02,Asosiy Ombor
+SOT-1003,iPad Pro M2,Planshetlar,12000000,10000000,4,2026-04-30 18:56:52,MIJOZ-03,Asosiy Ombor
+SOT-1004,AirPods Pro 2,Aksessuarlar,3000000,2200000,10,2026-04-30 18:56:52,MIJOZ-01,Asosiy Ombor
+SOT-04230334,fanta,Oziq-ovqat,19000,15000,1,2026-05-04 23:03:34,MEHMON,Asosiy Ombor
+SOT-04231159,Kartoshka,Oziq-ovqat,7000,6000,1,2026-05-04 23:11:59,MEHMON,Asosiy Ombor
+SOT-04231159,Gilos,Oziq-ovqat,30000,20000,1,2026-05-04 23:11:59,MEHMON,Asosiy Ombor
+SOT-MAR01,iPhone 15 Pro,Smartfonlar,15000000,12000000,2,2026-03-15 10:00:00,MIJOZ-01,Asosiy Ombor
+SOT-MAR02,MacBook Air M2,Noutbuklar,18000000,15000000,1,2026-03-20 12:00:00,MIJOZ-02,Asosiy Ombor
+SOT-MAR03,AirPods Pro 2,Aksessuarlar,3000000,2200000,5,2026-03-10 15:00:00,MIJOZ-01,Asosiy Ombor
+SOT-04233629,imphone 17,Elektronika,20000000,17000000,1,2026-05-04 23:36:29,MEHMON,Asosiy Ombor
+SOT-04233629,Gilos,Oziq-ovqat,30000,20000,1,2026-05-04 23:36:29,MEHMON,Asosiy Ombor
+SOT-04234500,Erkaklar futbolkasi,Kiyim-kechak,180000,150000,1,2026-05-04 23:45:00,MEHMON,Asosiy Ombor
