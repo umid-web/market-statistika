@@ -38,8 +38,13 @@ const Dashboard = () => {
 
   // Process data for charts
   const trendData = React.useMemo(() => {
-    if (!analytics || analytics.length === 0) return [];
-    // Group by month
+    if (!analytics || analytics.length === 0) {
+      // Demo Data for empty state
+      return [
+        { name: 'Yan', daromad: 400000 }, { name: 'Feb', daromad: 300000 },
+        { name: 'Mar', daromad: 600000 }, { name: 'Apr', daromad: 800000 }
+      ];
+    }
     const monthly = {};
     analytics.forEach(item => {
       const m = item.order_month;
@@ -49,7 +54,13 @@ const Dashboard = () => {
   }, [analytics]);
 
   const productData = React.useMemo(() => {
-    if (!analytics || analytics.length === 0) return [];
+    if (!analytics || analytics.length === 0) {
+      // Demo Data for empty state
+      return [
+        { name: 'Mahsulot A', value: 500000 }, { name: 'Mahsulot B', value: 300000 },
+        { name: 'Mahsulot C', value: 200000 }
+      ];
+    }
     return analytics
       .sort((a, b) => b.total_profit - a.total_profit)
       .slice(0, 5)
