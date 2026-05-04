@@ -4,13 +4,13 @@ import Sidebar from './components/Sidebar';
 import { AlertCircle, CheckCircle2, Lock } from 'lucide-react';
 
 // Lazy load pages for better performance and smaller initial bundle size
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const POS = lazy(() => import('./pages/POS'));
-const Admin = lazy(() => import('./pages/Admin'));
-const Documents = lazy(() => import('./pages/Documents'));
-const Customers = lazy(() => import('./pages/Customers'));
-const Analytics = lazy(() => import('./pages/Analytics'));
-const Settings = lazy(() => import('./pages/Settings'));
+import Dashboard from './pages/Dashboard';
+import POS from './pages/POS';
+import Admin from './pages/Admin';
+import Documents from './pages/Documents';
+import Customers from './pages/Customers';
+import Analytics from './pages/Analytics';
+import Settings from './pages/Settings';
 
 // Loading component for Suspense
 const PageLoader = () => (
