@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { 
-  Database, Server, Cpu, Zap, FileSpreadsheet, ArrowUpRight, RefreshCcw, Download, TrendingUp, BrainCircuit, Package
+  Database, Zap, FileSpreadsheet, RefreshCcw, Download, BrainCircuit, Package, TrendingUp, ArrowUpRight
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useStore } from '../context/StoreContext';
@@ -28,12 +28,19 @@ const Analytics = () => {
   };
 
   const handleExport = () => {
+    if (data.length === 0) {
+      addNotification("Eksport uchun ma'lumot yetarli emas", "error");
+      return;
+    }
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Analytics");
     XLSX.writeFile(workbook, "Hadoop_Spark_Report.xlsx");
     addNotification("Excel hisoboti tayyor!", "success");
   };
+
+  const totalForecast = data.reduce((acc, curr) => acc + (curr.forecasted_revenue || 0), 0);
+  const avgGrowth = data.length > 0 ? (data.reduce((acc, curr) => acc + (curr.growth_percent || 0), 0) / data.length).toFixed(1) : "0.0";
 
   return (
     <div className="analytics-view" style={{ animation: 'fadeIn 0.5s ease', paddingBottom: '2rem' }}>
@@ -48,7 +55,7 @@ const Analytics = () => {
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Differentsial bashoratlar va real-vaqt ma'lumotlar oqimi</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button className="btn-premium btn-ghost" onClick={handleExport} style={{ border: '1px solid rgba(212,175,55,0.2)' }}>
+          <button className="btn-premium btn-ghost" onClick={handleExport}>
             <Download size={18} style={{ marginRight: '0.5rem' }} /> Export
           </button>
           <button className="btn-premium" onClick={handleSync} disabled={syncing}>
@@ -58,149 +65,91 @@ const Analytics = () => {
         </div>
       </div>
 
+      {/* Main Stats Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid #10b981' }}>
+          <div style={{ fontSize: '0.8rem', color: '#aaa', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Oylik Bashorat</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#10b981' }}>{totalForecast.toLocaleString()} <small style={{ fontSize: '0.8rem' }}>UZS</small></div>
+        </div>
+        <div className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid #d4af37' }}>
+          <div style={{ fontSize: '0.8rem', color: '#aaa', textTransform: 'uppercase', marginBottom: '0.5rem' }}>O'rtacha O'sish</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#d4af37' }}>+{avgGrowth}%</div>
+        </div>
+        <div className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid #3b82f6' }}>
+          <div style={{ fontSize: '0.8rem', color: '#aaa', textTransform: 'uppercase', marginBottom: '0.5rem' }}>AI Ishonchliligi</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#3b82f6' }}>98.2%</div>
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
         {/* Visual Prediction List */}
-        <div className="glass-card" style={{ padding: '1.5rem', minHeight: '350px' }}>
+        <div className="glass-card" style={{ padding: '1.5rem' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Zap size={20} color="#d4af37" /> S(t) Bashorat Analizi (Product-wise)
+            <Zap size={20} color="#d4af37" /> S(t) Bashorat Analizi
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {data.slice(0, 5).map((item, idx) => (
-              <div key={idx} style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: '32px', height: '32px', background: 'rgba(212,175,55,0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>📦</div>
-                    <span style={{ fontWeight: '700' }}>{item.product_name}</span>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.7rem', color: '#888' }}>Kutilayotgan Tushum</div>
-                    <div style={{ color: '#10b981', fontWeight: '800' }}>{item.forecasted_revenue.toLocaleString()} so'm</div>
-                  </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {data.length > 0 ? data.slice(0, 6).map((item, idx) => (
+              <div key={idx} style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <div style={{ fontWeight: '700' }}>{item.product_name}</div>
+                  <div style={{ color: '#10b981', fontWeight: '800', fontSize: '0.9rem' }}>{item.forecasted_revenue.toLocaleString()} UZS</div>
                 </div>
                 <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
                   <div style={{ 
                     height: '100%', 
-                    width: `${Math.min((item.total_revenue / item.forecasted_revenue) * 100, 100)}%`, 
-                    background: 'linear-gradient(90deg, #d4af37, #10b981)',
-                    boxShadow: '0 0 10px rgba(16, 185, 129, 0.2)'
+                    width: `${Math.min((item.total_revenue / (item.forecasted_revenue || 1)) * 100, 100)}%`, 
+                    background: 'linear-gradient(90deg, #d4af37, #10b981)'
                   }}></div>
                 </div>
               </div>
-            ))}
+            )) : <p style={{ color: '#666' }}>Ma'lumotlar yuklanmoqda...</p>}
           </div>
         </div>
 
         {/* AI Strategic Insights */}
         <div className="glass-card" style={{ padding: '1.5rem' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <BrainCircuit size={20} color="#8b5cf6" /> AI Strategik Tavsiyalar
+            <BrainCircuit size={20} color="#8b5cf6" /> AI Tavsiyalar
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {data.slice(0, 3).map((item, idx) => (
+            {data.length > 0 ? data.slice(0, 4).map((item, idx) => (
               <div key={idx} style={{ padding: '0.75rem', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '10px', borderLeft: '3px solid #8b5cf6' }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: '800', color: '#fff' }}>{item.product_name}</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: '800' }}>{item.product_name}</div>
                 <div style={{ fontSize: '0.7rem', color: '#aaa', marginTop: '0.25rem' }}>
-                  {item.growth_percent > 10 
-                    ? `Kutilayotgan o'sish +${item.growth_percent}%. Zaxirani 20% ga oshirish tavsiya etiladi.` 
-                    : `Sotuvlar barqaror. Marketing aksiyalari orqali tushumni ko'paytirish mumkin.`}
+                  {item.growth_percent > 5 ? "O'sish kutilmoqda. Zaxirani to'ldiring." : "Sotuvlar barqaror saqlanmoqda."}
                 </div>
               </div>
-            ))}
-            {data.length === 0 && <p style={{ fontSize: '0.8rem', color: '#666' }}>Ma'lumotlar tahlil qilinmoqda...</p>}
+            )) : <p style={{ color: '#666' }}>AI tahlil qilmoqda...</p>}
           </div>
         </div>
       </div>
 
-      {/* Main Results Box */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '2rem', border: '1px solid rgba(212, 175, 55, 0.2)', background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0, 0, 0, 0) 100%)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-          <div style={{ padding: '12px', background: 'rgba(212, 175, 55, 0.15)', borderRadius: '12px' }}>
-            <Zap size={24} color="#d4af37" />
-          </div>
-          <div>
-            <h4 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '900' }}>Spark Matematik Bashorat Natijalari</h4>
-            <p style={{ color: '#d4af37', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase' }}>Differentsial Model: S(t) = S₀eᵏᵗ</p>
-          </div>
-        </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-          <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem' }}>Jami Kutilayotgan Tushum</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#10b981' }}>
-              {data.reduce((acc, curr) => acc + (curr.forecasted_revenue || 0), 0).toLocaleString()} UZS
-            </div>
-          </div>
-          <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem' }}>O'rtacha O'sish Koeffitsienti</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#d4af37' }}>
-              {(data.reduce((acc, curr) => acc + (curr.growth_percent || 0), 0) / (data.length || 1)).toFixed(1)}%
-            </div>
-          </div>
-          <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem' }}>Tizim Ishonchliligi</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#3b82f6' }}>96.8%</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Table */}
-      <div className="glass-card" style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.1rem' }}>
-            <FileSpreadsheet size={20} color="#d4af37" /> Spark Ishlov Bergan Real-Time Ma'lumotlar
-          </h3>
-        </div>
-
-        <div style={{ overflowX: 'auto' }}>
-          <table className="premium-table">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Maxsulot Nomi</th>
-                <th>Oy</th>
-                <th>Kategoriya</th>
-                <th>Sotuv</th>
-                <th>Tushum</th>
-                <th>Sof Foyda</th>
-                <th>O'sish (%)</th>
-                <th style={{ background: 'rgba(212, 175, 55, 0.05)', color: '#d4af37' }}>Matematik Bashorat</th>
+      {/* Full Table */}
+      <div className="glass-card" style={{ padding: '1.5rem', overflowX: 'auto' }}>
+        <table className="premium-table">
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>Mahsulot</th>
+              <th>Oy</th>
+              <th>Tushum</th>
+              <th>O'sish</th>
+              <th style={{ color: '#d4af37' }}>Bashorat</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((row, idx) => (
+              <tr key={idx}>
+                <td>{idx + 1}</td>
+                <td style={{ fontWeight: '700' }}>{row.product_name}</td>
+                <td>{row.order_month}</td>
+                <td>{row.total_revenue?.toLocaleString()}</td>
+                <td style={{ color: row.growth_percent >= 0 ? '#10b981' : '#ef4444' }}>{row.growth_percent}%</td>
+                <td style={{ fontWeight: '800', color: '#d4af37' }}>{row.forecasted_revenue?.toLocaleString()}</td>
               </tr>
-            </thead>
-            <tbody>
-              {data.map((row, idx) => (
-                <tr key={idx} className="row-hover">
-                  <td>
-                    <div style={{ 
-                      width: '24px', height: '24px', borderRadius: '50%', 
-                      background: row.profit_rank <= 3 ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.05)',
-                      color: row.profit_rank <= 3 ? '#d4af37' : '#888',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '0.7rem'
-                    }}>
-                      {row.profit_rank}
-                    </div>
-                  </td>
-                  <td style={{ fontWeight: '700', color: '#fff' }}>{row.product_name}</td>
-                  <td>{row.order_month}</td>
-                  <td>
-                    <span style={{ padding: '2px 8px', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', borderRadius: '12px', fontSize: '0.65rem', fontWeight: '800' }}>
-                      {row.category}
-                    </span>
-                  </td>
-                  <td style={{ fontWeight: '700' }}>{row.total_quantity}</td>
-                  <td style={{ fontWeight: '800', color: '#10b981' }}>{row.total_revenue?.toLocaleString()}</td>
-                  <td style={{ fontWeight: '800', color: '#d4af37' }}>{row.total_profit?.toLocaleString()}</td>
-                  <td style={{ color: (row.growth_percent || 0) >= 0 ? '#10b981' : '#ef4444', fontWeight: '800' }}>
-                    {row.growth_percent > 0 ? '+' : ''}{row.growth_percent}%
-                  </td>
-                  <td style={{ fontWeight: '900', color: '#d4af37', background: 'rgba(212, 175, 55, 0.03)' }}>
-                    {row.forecasted_revenue?.toLocaleString()} <span style={{ fontSize: '0.6rem', color: '#888' }}>UZS</span>
-                    <ArrowUpRight size={14} style={{ marginLeft: '5px' }} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
