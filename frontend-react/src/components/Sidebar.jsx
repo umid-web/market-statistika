@@ -30,41 +30,43 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
   return (
     <aside className="sidebar">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '3rem', padding: '0 0.5rem' }}>
-        <div style={{ 
-          width: '45px', 
-          height: '45px', 
-          background: 'linear-gradient(135deg, #d4af37 0%, #b8860b 100%)', 
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 8px 15px rgba(212, 175, 55, 0.3)'
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '3.5rem', padding: '0 0.5rem' }}>
+        <div className="stat-icon-wrapper" style={{ 
+          width: '48px', 
+          height: '48px', 
+          background: 'linear-gradient(135deg, var(--accent-gold) 0%, #b8860b 100%)', 
+          borderRadius: '14px',
+          marginBottom: '0',
+          boxShadow: '0 8px 20px rgba(226, 183, 74, 0.3)'
         }}>
-          <Package color="black" size={24} strokeWidth={2.5} />
+          <Package color="#050a0f" size={24} strokeWidth={2.5} />
         </div>
-        <span style={{ fontSize: '1.4rem', fontWeight: '800', letterSpacing: '-0.5px' }}>
-          V-ERP <small style={{ color: '#d4af37', fontSize: '0.6rem', verticalAlign: 'top' }}>PRO</small>
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '1.4rem', fontWeight: '800', letterSpacing: '-1px', lineHeight: '1' }}>
+            V-ERP <span className="text-gold" style={{ fontSize: '1.4rem' }}>PRO</span>
+          </span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px', marginTop: '4px' }}>Enterprise</span>
+        </div>
       </div>
 
-      <nav style={{ display: 'flex', flexNavigation: 'column', gap: '0.25rem', flexDirection: 'column' }}>
+      <nav style={{ display: 'flex', flexNavigation: 'column', gap: '0.4rem', flexDirection: 'column' }}>
         {visibleItems.map((item) => (
           <div 
             key={item.id}
             className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
             onClick={() => setActiveTab(item.id)}
+            style={{ padding: '0.9rem 1.25rem' }}
           >
-            <item.icon size={20} strokeWidth={activeTab === item.id ? 2.5 : 2} />
+            <item.icon size={20} strokeWidth={activeTab === item.id ? 2.5 : 2} color={activeTab === item.id ? 'var(--accent-gold)' : 'inherit'} />
             <span>{item.label}</span>
           </div>
         ))}
       </nav>
 
-      <div style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem' }}>
+      <div style={{ marginTop: 'auto', borderTop: '1px solid var(--glass-border)', paddingTop: '2rem' }}>
         <div 
           className="nav-item" 
-          style={{ color: '#8b5cf6', cursor: 'pointer' }}
+          style={{ color: 'var(--accent-purple)', cursor: 'pointer', background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.1)' }}
           onClick={() => {
             if (window.lockScreen) window.lockScreen();
           }}

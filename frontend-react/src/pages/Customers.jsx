@@ -74,96 +74,137 @@ const Customers = () => {
   const yearlyCount = new Set(yearlyReceipts.map(r => r.order_id)).size;
 
   return (
-    <div className="crm-module" style={{ animation: 'fadeIn 0.5s ease' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+    <div className="crm-module fadeIn">
+      {/* Premium Header Section */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3.5rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#00f2ff', marginBottom: '0.5rem' }}>
-            <Activity size={20} />
-            <span style={{ fontSize: '0.85rem', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>Savdo Tahlili</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <div className="ai-status-pulse" style={{ background: 'var(--accent-emerald)' }}></div>
+            <span style={{ fontSize: '0.8rem', color: 'var(--accent-emerald)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Financial Intelligence</span>
           </div>
-          <h2 style={{ fontSize: '2.2rem', fontWeight: '800', letterSpacing: '-1px' }}>Sotilgan Maxsulotlar Hisoboti</h2>
+          <h1 className="text-gradient" style={{ fontSize: '3rem', fontWeight: '800', letterSpacing: '-2px', marginBottom: '0.5rem' }}>Savdo Hisobotlari</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Sotilgan mahsulotlar va tushumlar bo'yicha batafsil tahliliy ma'lumotlar.</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', borderTop: '4px solid #10b981' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3.5rem' }}>
+        <div className="glass-card stat-item animate-float" style={{ borderLeft: '4px solid var(--accent-emerald)', padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <span style={{ color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.8rem' }}>Bugungi Savdo</span>
-            <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '0.5rem', borderRadius: '8px', color: '#10b981' }}>
-              <Receipt size={20} />
+            <span style={{ color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Bugungi Savdo</span>
+            <div className="stat-icon-wrapper" style={{ width: '40px', height: '40px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', marginBottom: '0' }}>
+              <Receipt size={20} color="var(--accent-emerald)" />
             </div>
           </div>
-          <h3 style={{ fontSize: '2rem', fontWeight: '900', color: 'white', marginBottom: '0.5rem' }}>
-            {dailyTotal.toLocaleString()} <small style={{fontSize: '0.9rem', color: '#666', fontWeight: '600'}}>so'm</small>
+          <h3 className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem' }}>
+            {dailyTotal.toLocaleString()} <small style={{fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600'}}>UZS</small>
           </h3>
-          <p style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '600' }}>Jami {dailyCount} ta chek</p>
+          <div style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)', fontWeight: '800', background: 'rgba(16, 185, 129, 0.05)', padding: '6px 12px', borderRadius: '10px', width: 'fit-content' }}>
+            {dailyCount} ta chek yopildi
+          </div>
         </div>
 
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', borderTop: '4px solid #3b82f6' }}>
+        <div className="glass-card stat-item animate-float" style={{ borderLeft: '4px solid var(--accent-gold)', padding: '2rem', animationDelay: '0.1s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <span style={{ color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.8rem' }}>Oylik Savdo</span>
-            <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '0.5rem', borderRadius: '8px', color: '#3b82f6' }}>
-              <Calendar size={20} />
+            <span style={{ color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Oylik Savdo</span>
+            <div className="stat-icon-wrapper" style={{ width: '40px', height: '40px', background: 'var(--accent-gold-soft)', borderRadius: '12px', marginBottom: '0' }}>
+              <Calendar size={20} color="var(--accent-gold)" />
             </div>
           </div>
-          <h3 style={{ fontSize: '2rem', fontWeight: '900', color: 'white', marginBottom: '0.5rem' }}>
-            {monthlyTotal.toLocaleString()} <small style={{fontSize: '0.9rem', color: '#666', fontWeight: '600'}}>so'm</small>
+          <h3 className="text-gold" style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem' }}>
+            {monthlyTotal.toLocaleString()} <small style={{fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600'}}>UZS</small>
           </h3>
-          <p style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: '600' }}>Jami {monthlyCount} ta chek</p>
+          <div style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', fontWeight: '800', background: 'var(--accent-gold-soft)', padding: '6px 12px', borderRadius: '10px', width: 'fit-content' }}>
+            {monthlyCount} ta tranzaksiya
+          </div>
         </div>
 
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', borderTop: '4px solid #d4af37' }}>
+        <div className="glass-card stat-item animate-float" style={{ borderLeft: '4px solid var(--accent-purple)', padding: '2rem', animationDelay: '0.2s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <span style={{ color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.8rem' }}>Yillik Savdo</span>
-            <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '0.5rem', borderRadius: '8px', color: '#d4af37' }}>
-              <DollarSign size={20} />
+            <span style={{ color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Yillik Savdo</span>
+            <div className="stat-icon-wrapper" style={{ width: '40px', height: '40px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px', marginBottom: '0' }}>
+              <DollarSign size={20} color="var(--accent-purple)" />
             </div>
           </div>
-          <h3 style={{ fontSize: '2rem', fontWeight: '900', color: 'white', marginBottom: '0.5rem' }}>
-            {yearlyTotal.toLocaleString()} <small style={{fontSize: '0.9rem', color: '#666', fontWeight: '600'}}>so'm</small>
+          <h3 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#fff', marginBottom: '0.5rem' }}>
+            {yearlyTotal.toLocaleString()} <small style={{fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600'}}>UZS</small>
           </h3>
-          <p style={{ fontSize: '0.8rem', color: '#d4af37', fontWeight: '600' }}>Jami {yearlyCount} ta chek</p>
+          <div style={{ fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: '800', background: 'rgba(139, 92, 246, 0.05)', padding: '6px 12px', borderRadius: '10px', width: 'fit-content' }}>
+            Jami {yearlyCount} ta chek
+          </div>
         </div>
       </div>
 
-      <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <ShoppingBag size={20} color="#00f2ff" /> Tovar Bo'yicha Sotuvlar
-          </h3>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className={`btn-premium ${filterType === 'all' ? '' : 'btn-ghost'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => setFilterType('all')}>Barchasi</button>
-            <button className={`btn-premium ${filterType === 'today' ? '' : 'btn-ghost'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => setFilterType('today')}>Bugun</button>
-            <button className={`btn-premium ${filterType === 'week' ? '' : 'btn-ghost'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => setFilterType('week')}>Hafta</button>
-            <button className={`btn-premium ${filterType === 'month' ? '' : 'btn-ghost'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => setFilterType('month')}>Oy</button>
-            <button className={`btn-premium ${filterType === 'year' ? '' : 'btn-ghost'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => setFilterType('year')}>Yil</button>
+      <div className="glass-card" style={{ padding: '3rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', letterSpacing: '-0.5px' }} className="text-gradient">Mahsulotlar Kesimida Savdo</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>Sotilgan mahsulotlarning umumiy hajmi va tushum miqdori</p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '6px', borderRadius: '14px', border: '1px solid var(--glass-border)' }}>
+            {[
+              { id: 'all', label: 'Barchasi' },
+              { id: 'today', label: 'Bugun' },
+              { id: 'week', label: 'Hafta' },
+              { id: 'month', label: 'Oy' },
+              { id: 'year', label: 'Yil' }
+            ].map(f => (
+              <button
+                key={f.id}
+                onClick={() => setFilterType(f.id)}
+                style={{
+                  padding: '0.6rem 1.25rem',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: filterType === f.id ? 'var(--accent-gold)' : 'transparent',
+                  color: filterType === f.id ? '#000' : 'var(--text-secondary)',
+                  fontSize: '0.8rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'var(--transition)'
+                }}
+              >
+                {f.label}
+              </button>
+            ))}
           </div>
         </div>
         <div style={{ overflowX: 'auto' }}>
           <table className="premium-table">
             <thead>
               <tr>
-                <th>Maxsulot Nomi</th>
+                <th>Mahsulot Nomi</th>
                 <th>Kategoriya</th>
-                <th>Necha marta sotildi?</th>
-                <th>Jami Sotilgan Miqdor</th>
-                <th>Umumiy Tushum</th>
+                <th>Sotuv Soni</th>
+                <th>Umumiy Miqdor</th>
+                <th>Jami Tushum</th>
               </tr>
             </thead>
             <tbody>
               {groupedProducts.map((p, idx) => (
                 <tr key={idx}>
-                  <td style={{ fontWeight: '800', color: '#00f2ff', fontSize: '0.95rem' }}>{p.name}</td>
-                  <td style={{ color: 'var(--text-secondary)' }}>{p.category}</td>
-                  <td style={{ fontWeight: '700' }}>{p.times_sold} marta</td>
-                  <td style={{ fontWeight: '800', fontSize: '1.1rem' }}>{p.total_quantity}</td>
-                  <td style={{ fontWeight: '800', color: 'white', fontSize: '1.1rem' }}>
-                    {p.total_amount.toLocaleString()} <small style={{fontSize: '0.75rem'}}>so'm</small>
+                  <td style={{ fontWeight: '800', color: '#fff', fontSize: '1rem' }}>{p.name}</td>
+                  <td>
+                    <span style={{ 
+                      background: 'rgba(255,255,255,0.03)', 
+                      padding: '6px 12px', 
+                      borderRadius: '10px', 
+                      fontSize: '0.75rem', 
+                      fontWeight: '800',
+                      color: 'var(--text-muted)',
+                      border: '1px solid var(--glass-border)'
+                    }}>
+                      {p.category}
+                    </span>
+                  </td>
+                  <td style={{ fontWeight: '700', color: 'var(--accent-gold)' }}>{p.times_sold} marta</td>
+                  <td style={{ fontWeight: '800', fontSize: '1.25rem' }}>{p.total_quantity} <small style={{fontSize: '0.75rem', color: 'var(--text-muted)'}}>ta</small></td>
+                  <td style={{ fontWeight: '900', color: 'var(--accent-emerald)', fontSize: '1.25rem' }}>
+                    {p.total_amount.toLocaleString()} <small style={{fontSize: '0.75rem', color: 'var(--text-muted)'}}>UZS</small>
                   </td>
                 </tr>
               ))}
               {groupedProducts.length === 0 && !loading && (
-                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: '#666' }}>Hozircha sotuvlar yo'q</td></tr>
+                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: '600' }}>Hozircha ma'lumotlar mavjud emas</td></tr>
               )}
             </tbody>
           </table>

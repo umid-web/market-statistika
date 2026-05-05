@@ -143,53 +143,47 @@ const POS = () => {
   };
 
   return (
-    <div className="pos-grid" style={{ animation: 'fadeIn 0.5s ease', position: 'relative' }}>
+    <div className="pos-grid fadeIn" style={{ position: 'relative' }}>
       
       {showReceipt && receiptData && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(5px)' }}>
-          <div className="glass-card" style={{ width: '400px', padding: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative' }}>
-            <div style={{ textAlign: 'center', borderBottom: '1px dashed #666', paddingBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#d4af37', letterSpacing: '1px', marginBottom: '0.5rem' }}>V-ERP PRO</h2>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Manzil: Toshkent sh., Chilonzor</p>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Tel: +998 90 123 45 67</p>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(20px)' }}>
+          <div className="glass-card animate-float" style={{ width: '450px', padding: '3rem', display: 'flex', flexDirection: 'column', gap: '2rem', border: '1px solid var(--accent-gold-glow)' }}>
+            <div style={{ textAlign: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '2rem' }}>
+              <h2 className="text-gold" style={{ fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-2px', marginBottom: '0.5rem' }}>V-ERP PRO</h2>
+              <div style={{ background: 'var(--accent-gold-soft)', color: 'var(--accent-gold)', padding: '4px 12px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: '800', width: 'fit-content', margin: '0 auto', textTransform: 'uppercase', letterSpacing: '1px' }}>Official Receipt</div>
             </div>
             
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                <span style={{ color: '#666' }}>Sana:</span>
-                <strong>{receiptData.date}</strong>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Sana</div>
+                <div style={{ fontWeight: '700' }}>{receiptData.date}</div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                <span style={{ color: '#666' }}>Chek ID:</span>
-                <strong>{receiptData.order_id}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                <span style={{ color: '#666' }}>Mijoz:</span>
-                <strong>{receiptData.customer}</strong>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Chek ID</div>
+                <div style={{ fontWeight: '700', color: 'var(--accent-purple)' }}>#{receiptData.order_id}</div>
               </div>
             </div>
 
-            <div style={{ borderTop: '1px dashed #666', borderBottom: '1px dashed #666', padding: '1rem 0' }}>
+            <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '16px', padding: '1.5rem', border: '1px solid var(--glass-border)' }}>
               {receiptData.items.map((item, idx) => (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '0.9rem' }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: '700' }}>{item.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#888' }}>{item.quantity} x {item.sell_price.toLocaleString()} so'm</div>
+                    <div style={{ fontWeight: '700', color: '#fff' }}>{item.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.quantity} {item.unit || 'ta'} x {item.sell_price.toLocaleString()}</div>
                   </div>
-                  <div style={{ fontWeight: '800' }}>
-                    {(item.quantity * item.sell_price).toLocaleString()} so'm
+                  <div style={{ fontWeight: '800', color: 'var(--accent-gold)' }}>
+                    {(item.quantity * item.sell_price).toLocaleString()}
                   </div>
                 </div>
               ))}
+              <div style={{ borderTop: '1px solid var(--glass-border)', marginTop: '1rem', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '1.1rem', fontWeight: '800' }}>JAMI:</span>
+                <span className="text-gradient" style={{ fontSize: '1.75rem', fontWeight: '900' }}>{receiptData.total.toLocaleString()} <small style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>UZS</small></span>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '1.2rem', fontWeight: '700' }}>JAMI YAKUN:</span>
-              <span style={{ fontSize: '1.5rem', fontWeight: '900', color: '#10b981' }}>{receiptData.total.toLocaleString()} so'm</span>
-            </div>
-
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-              <button className="btn-premium btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => {
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button className="btn-premium btn-ghost" style={{ flex: 1 }} onClick={() => {
                 const doc = new jsPDF({ format: [80, 200] });
                 doc.setFontSize(14);
                 doc.text("V-ERP PRO STORE", 40, 10, { align: 'center' });
@@ -209,9 +203,9 @@ const POS = () => {
                 doc.text(`JAMI: ${receiptData.total.toLocaleString()} so'm`, 5, y+10);
                 doc.save(`chek_${receiptData.order_id}.pdf`);
               }}>
-                <Download size={18} /> Yuklash
+                <Download size={18} /> PDF
               </button>
-              <button className="btn-premium" style={{ flex: 1, justifyContent: 'center' }} onClick={() => { setShowReceipt(false); setReceiptData(null); }}>
+              <button className="btn-premium" style={{ flex: 1.5 }} onClick={() => { setShowReceipt(false); setReceiptData(null); }}>
                 Yangi Sotuv
               </button>
             </div>
@@ -219,160 +213,173 @@ const POS = () => {
         </div>
       )}
 
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-
-        {/* Kunlik Tushum Banner */}
+      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+        {/* Professional Summary Header */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1rem',
-          padding: '1.25rem',
-          background: 'rgba(212, 175, 55, 0.05)',
-          borderRadius: '16px',
-          border: '1px solid rgba(212, 175, 55, 0.15)'
+          gap: '2rem',
+          padding: '2rem',
+          background: 'linear-gradient(135deg, rgba(226, 183, 74, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%)',
+          borderRadius: '24px',
+          border: '1px solid var(--glass-border)'
         }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.7rem', color: '#d4af37', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>Bugungi Tushum</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#10b981' }}>{Math.round(dailyStats.revenue).toLocaleString()} <small style={{ fontSize: '0.7rem', color: '#666' }}>so'm</small></div>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Bugungi Tushum</div>
+            <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--accent-emerald)', letterSpacing: '-1px' }}>
+              {Math.round(dailyStats.revenue).toLocaleString()} <small style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>UZS</small>
+            </div>
           </div>
-          <div style={{ textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.06)', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
-            <div style={{ fontSize: '0.7rem', color: '#d4af37', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>Cheklar Soni</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: 'white' }}>{dailyStats.orders} <small style={{ fontSize: '0.7rem', color: '#666' }}>ta</small></div>
+          <div style={{ borderLeft: '1px solid var(--glass-border)', paddingLeft: '2rem' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Tranzaksiyalar</div>
+            <div style={{ fontSize: '2rem', fontWeight: '800', color: '#fff', letterSpacing: '-1px' }}>
+              {dailyStats.orders} <small style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ta</small>
+            </div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.7rem', color: '#d4af37', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>Sotilgan Mahsulot</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: 'white' }}>{dailyStats.items} <small style={{ fontSize: '0.7rem', color: '#666' }}>birlik</small></div>
+          <div style={{ borderLeft: '1px solid var(--glass-border)', paddingLeft: '2rem' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Sotuv Hajmi</div>
+            <div style={{ fontSize: '2rem', fontWeight: '800', color: '#fff', letterSpacing: '-1px' }}>
+              {dailyStats.items} <small style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>birlik</small>
+            </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <div style={{ position: 'relative', flex: 1 }}>
-            <Search style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: '#666' }} size={20} />
+            <Search style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-gold)' }} size={22} />
             <input 
               id="pos-search"
               className="premium-input" 
-              placeholder="Maxsulot nomi, SKU yoki Barcode... (F3)" 
-              style={{ paddingLeft: '3.5rem' }} 
+              placeholder="Mahsulot nomi, SKU yoki Barcode... (F3)" 
+              style={{ paddingLeft: '4rem', fontSize: '1rem', height: '60px', borderRadius: '18px' }} 
               value={searchTerm} 
               onChange={(e) => setSearchTerm(e.target.value)} 
             />
           </div>
-
-          <button className="btn-premium btn-ghost" style={{ padding: '1rem' }} onClick={() => addNotification("Skaner qurilmasi topilmadi yoki ulanmagan!", "error")}><QrCode size={20} /></button>
+          <button className="btn-premium btn-ghost" style={{ width: '60px', height: '60px', borderRadius: '18px' }} onClick={() => addNotification("Skaner topilmadi!", "error")}><QrCode size={24} /></button>
         </div>
 
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
-          gap: '1.5rem', 
+          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', 
+          gap: '2rem', 
           overflowY: 'auto',
-          paddingRight: '0.5rem'
+          paddingRight: '1rem',
+          maxHeight: 'calc(100vh - 450px)'
         }}>
           {filteredProducts.map(product => (
             <div 
               key={product.id} 
-              className="product-card" 
-              style={{ cursor: 'pointer', position: 'relative' }}
+              className="glass-card" 
+              style={{ 
+                cursor: 'pointer', 
+                padding: '1.5rem', 
+                background: 'rgba(255,255,255,0.02)',
+                border: activeTab === product.id ? '1px solid var(--accent-gold)' : '1px solid var(--glass-border)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}
               onClick={() => addToCart(product)}
             >
-              <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#d4af37', marginBottom: '0.5rem', textTransform: 'uppercase' }}>{product.category}</div>
-              <div style={{ fontWeight: '700', fontSize: '1.1rem', marginBottom: '1rem', lineHeight: '1.3' }}>{product.name}</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+              <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.category}</div>
+              <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#fff', height: '45px', overflow: 'hidden' }}>{product.name}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Zaxira: {product.stock} {product.unit || 'ta'}</div>
-                  <div style={{ fontWeight: '800', fontSize: '1.2rem', color: 'white', marginTop: '0.25rem' }}>{Math.round(Number(product.sell_price || 0)).toLocaleString()} <small style={{fontSize: '0.7rem'}}>so'm</small></div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Omborda: {product.stock} {product.unit}</div>
+                  <div style={{ fontWeight: '800', fontSize: '1.25rem', color: 'var(--accent-emerald)' }}>{Math.round(product.sell_price).toLocaleString()}</div>
                 </div>
-                <div style={{ background: 'var(--accent-gold)', color: 'black', borderRadius: '8px', padding: '4px' }}>
-                  <PlusCircle size={20} />
+                <div className="stat-icon-wrapper" style={{ width: '40px', height: '40px', background: 'var(--accent-gold-soft)', borderRadius: '12px', marginBottom: '0' }}>
+                  <PlusCircle size={20} color="var(--accent-gold)" />
                 </div>
               </div>
               {product.stock <= 0 && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', color: '#ef4444' }}>TUGAGAN</div>
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', color: '#ef4444', letterSpacing: '2px' }}>OUT OF STOCK</div>
               )}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', padding: '0' }}>
-        <div style={{ padding: '1.75rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <ShoppingBag color="#d4af37" size={22} />
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '800' }}>Savat</h3>
+      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', padding: '0', background: 'var(--bg-sidebar)' }}>
+        <div style={{ padding: '2rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div className="stat-icon-wrapper" style={{ width: '42px', height: '42px', background: 'var(--accent-gold-soft)', borderRadius: '12px', marginBottom: '0' }}>
+              <ShoppingBag color="var(--accent-gold)" size={20} />
+            </div>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: '800', letterSpacing: '-0.5px' }}>Savat</h3>
           </div>
-          <button className="btn-premium btn-ghost" style={{ padding: '0.5rem', color: '#ef4444' }} onClick={clearCart} title="Tozalash (F2)">
-            <Trash2 size={18} /> <span className="hotkey-hint" style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.2)' }}>F2</span>
+          <button className="btn-premium btn-ghost" style={{ padding: '0.6rem', color: '#ef4444', borderRadius: '12px' }} onClick={clearCart}>
+            <Trash2 size={20} />
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
           {cart.map(item => (
             <div key={item.id} style={{ 
               display: 'flex', 
-              gap: '1rem', 
-              marginBottom: '1.25rem', 
-              paddingBottom: '1.25rem', 
-              borderBottom: '1px solid rgba(255,255,255,0.05)'
+              gap: '1.25rem', 
+              marginBottom: '1.5rem', 
+              paddingBottom: '1.5rem', 
+              borderBottom: '1px solid var(--glass-border)'
             }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{item.name}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <input 
-                    type="number" 
-                    value={item.quantity} 
-                    onChange={e => updateCartQuantity(item.id, e.target.value)}
-                    style={{ width: '60px', padding: '0.2rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white', borderRadius: '4px', textAlign: 'center', fontSize: '0.8rem' }}
-                    min="0.01"
-                    step="any"
-                    max={item.stock}
-                  />
-                  <span>{item.unit || 'ta'} x {Math.round(Number(item.sell_price || 0)).toLocaleString()} so'm</span>
+                <div style={{ fontWeight: '700', fontSize: '1rem', color: '#fff', marginBottom: '0.5rem' }}>{item.name}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '4px' }}>
+                    <input 
+                      type="number" 
+                      value={item.quantity} 
+                      onChange={e => updateCartQuantity(item.id, e.target.value)}
+                      style={{ width: '50px', background: 'transparent', border: 'none', color: 'white', textAlign: 'center', fontWeight: '800' }}
+                      min="0.01"
+                    />
+                  </div>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>x {item.sell_price.toLocaleString()}</span>
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '800', color: 'white' }}>{Math.round(Number(item.sell_price || 0) * Number(item.quantity || 0)).toLocaleString()}</div>
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', justifyContent: 'flex-end' }}>
-                   <X size={16} color="#ef4444" style={{ cursor: 'pointer' }} onClick={() => removeFromCart(item.id)} />
-                </div>
+                <div style={{ fontWeight: '800', fontSize: '1.1rem', color: 'var(--accent-gold)' }}>{(item.sell_price * item.quantity).toLocaleString()}</div>
+                <button onClick={() => removeFromCart(item.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', marginTop: '0.5rem', cursor: 'pointer' }}><X size={18} /></button>
               </div>
             </div>
           ))}
           {cart.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '4rem 0', color: '#666' }}>
-              <ShoppingBag size={48} style={{ marginBottom: '1rem', opacity: 0.2 }} />
-              <div>Savat bo'sh</div>
+            <div style={{ textAlign: 'center', padding: '6rem 0' }}>
+              <div style={{ opacity: 0.1, marginBottom: '1.5rem' }}><ShoppingBag size={80} /></div>
+              <div style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Savat bo'sh</div>
             </div>
           )}
         </div>
 
-        <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid var(--glass-border)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', color: 'var(--text-secondary)' }}>
-            <span>Sotuvchi:</span>
-            <span>Admin</span>
-          </div>
+        <div style={{ padding: '2.5rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid var(--glass-border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '1.25rem', fontWeight: '700' }}>Jami Summa:</span>
-            <span style={{ fontSize: '1.75rem', fontWeight: '800', color: '#d4af37' }}>{subTotal.toLocaleString()} <small style={{fontSize: '0.9rem'}}>so'm</small></span>
+            <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-secondary)' }}>Jami Yakun:</span>
+            <div style={{ textAlign: 'right' }}>
+              <div className="text-gold" style={{ fontSize: '2.25rem', fontWeight: '900' }}>{subTotal.toLocaleString()}</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>O'zbek so'mi</div>
+            </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
             <button 
-              className={`nav-item ${paymentType === 'cash' ? 'active' : ''}`} 
-              style={{ justifyContent: 'center', marginBottom: '0' }}
+              className={`btn-premium ${paymentType === 'cash' ? '' : 'btn-ghost'}`} 
               onClick={() => setPaymentType('cash')}
+              style={{ padding: '1rem' }}
             >
               <Banknote size={20} /> Naqd
             </button>
             <button 
-              className={`nav-item ${paymentType === 'card' ? 'active' : ''}`} 
-              style={{ justifyContent: 'center', marginBottom: '0' }}
+              className={`btn-premium ${paymentType === 'card' ? '' : 'btn-ghost'}`} 
               onClick={() => setPaymentType('card')}
+              style={{ padding: '1rem' }}
             >
               <CreditCard size={20} /> Karta
             </button>
           </div>
 
-          <button className="btn-premium" style={{ width: '100%', padding: '1.25rem', fontSize: '1.1rem', justifyContent: 'center' }} onClick={handleCheckout}>
-            To'lovni Tasdiqlash <ArrowRight size={20} /> <span className="hotkey-hint">F1</span>
+          <button className="btn-premium" style={{ width: '100%', padding: '1.5rem', fontSize: '1.2rem' }} onClick={handleCheckout}>
+            TO'LOVNI TASDIQLASH <ArrowRight size={24} />
           </button>
         </div>
       </div>

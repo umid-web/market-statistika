@@ -88,129 +88,118 @@ const Admin = () => {
   };
 
   return (
-    <div className="inventory-module" style={{ animation: 'fadeIn 0.5s ease' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+    <div className="inventory-module fadeIn">
+      {/* Premium Header Section */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3.5rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#d4af37', marginBottom: '0.5rem' }}>
-            <Boxes size={20} />
-            <span style={{ fontSize: '0.85rem', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>Logistika Boshqaruvi</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <div className="ai-status-pulse" style={{ background: 'var(--accent-gold)' }}></div>
+            <span style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Inventory Intelligence</span>
           </div>
-          <h2 style={{ fontSize: '2.2rem', fontWeight: '800', letterSpacing: '-1px' }}>Ombor va Zaxiralar</h2>
+          <h1 className="text-gradient" style={{ fontSize: '3rem', fontWeight: '800', letterSpacing: '-2px', marginBottom: '0.5rem' }}>Ombor va Zaxiralar</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Tovarlar qoldig'i va logistika zanjirini boshqarish paneli.</p>
         </div>
+
         <button className="btn-premium" onClick={() => {
           if (showAddForm) {
             setEditingProduct(null);
             setNewProduct({ name: '', sku: '', category: 'Elektronika', brand: '', buy_price: '', sell_price: '', warehouse: 'Asosiy Ombor', stock: '', min_stock: '5', barcode: '', unit: 'dona' });
           }
           setShowAddForm(!showAddForm);
-        }}>
-          <Plus size={20} /> {showAddForm ? "Yopish" : "Yangi Maxsulot"}
+        }} style={{ padding: '1rem 2rem', fontSize: '1rem' }}>
+          <Plus size={22} /> {showAddForm ? "Yopish" : "Yangi Mahsulot Qo'shish"}
         </button>
       </div>
 
       {showAddForm && (
-        <div className="glass-card" style={{ marginBottom: '3rem', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
-          <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Zap size={24} color="#d4af37" />
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700' }}>
-              {editingProduct ? "Tovarni Tahrirlash" : "Tovar ma'lumotlarini kiritish"}
-            </h3>
+        <div className="glass-card animate-float" style={{ marginBottom: '4rem', padding: '3rem', border: '1px solid var(--accent-gold-glow)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '2.5rem' }}>
+            <div className="stat-icon-wrapper" style={{ width: '50px', height: '50px', background: 'var(--accent-gold-soft)', borderRadius: '16px', marginBottom: '0' }}>
+              <Zap size={24} color="var(--accent-gold)" />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#fff' }}>
+                {editingProduct ? "Mahsulotni Tahrirlash" : "Yangi Mahsulot Ma'lumotlari"}
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Barcha maydonlarni to'g'ri to'ldirilganligiga ishonch hosil qiling.</p>
+            </div>
           </div>
           
-          <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            <div className="stat-item">
-              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Maxsulot Nomi</label>
-              <input className="premium-input" placeholder="Masalan: iPhone 15 Pro" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} required />
+          <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+            <div style={{ gridColumn: '1 / span 2' }}>
+              <label className="stat-label" style={{ marginBottom: '0.75rem', display: 'block', fontSize: '0.85rem', letterSpacing: '1px' }}>MAHSULOT NOMI</label>
+              <input className="premium-input" style={{ height: '55px', fontSize: '1.1rem' }} placeholder="Masalan: iPhone 15 Pro Max 256GB" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} required />
             </div>
             
-            <div className="stat-item">
-              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>SKU / Artikul</label>
-              <input className="premium-input" placeholder="INV-001" value={newProduct.sku} onChange={e => setNewProduct({...newProduct, sku: e.target.value})} />
+            <div>
+              <label className="stat-label" style={{ marginBottom: '0.75rem', display: 'block', fontSize: '0.85rem' }}>SKU / ARTIKUL</label>
+              <input className="premium-input" style={{ height: '55px' }} placeholder="INV-2024-001" value={newProduct.sku} onChange={e => setNewProduct({...newProduct, sku: e.target.value})} />
             </div>
 
-            <div className="stat-item">
-              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Kategoriya</label>
-              <select className="premium-input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}>
+            <div>
+              <label className="stat-label" style={{ marginBottom: '0.75rem', display: 'block', fontSize: '0.85rem' }}>KATEGORIYA</label>
+              <select className="premium-input" style={{ height: '55px' }} value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}>
                 <option value="Elektronika">Elektronika</option>
                 <option value="Kiyim-kechak">Kiyim-kechak</option>
                 <option value="Maishiy texnika">Maishiy texnika</option>
                 <option value="Oziq-ovqat">Oziq-ovqat</option>
+                <option value="Avto-ehtiyot qismlar">Avto-ehtiyot qismlar</option>
               </select>
             </div>
 
-            <div className="stat-item">
-              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>O'lchov Birligi</label>
-              <select className="premium-input" value={newProduct.unit || 'dona'} onChange={e => setNewProduct({...newProduct, unit: e.target.value})}>
-                <option value="dona">Dona / Ta</option>
-                <option value="kg">Kilogramm (kg)</option>
-                <option value="litr">Litr (L)</option>
-                <option value="metr">Metr (m)</option>
-                <option value="quti">Quti / Pachka</option>
-              </select>
-            </div>
-
-            <div className="stat-item">
-              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Ombor Manzili</label>
-              <select className="premium-input" value={newProduct.warehouse} onChange={e => setNewProduct({...newProduct, warehouse: e.target.value})}>
-                <option value="Asosiy Ombor">Asosiy Ombor</option>
-                <option value="2-Filial Ombori">2-Filial Ombori</option>
-                <option value="Do'kon Peshtaxtasi">Do'kon Peshtaxtasi</option>
-              </select>
-            </div>
-
-            <div className="stat-item">
-              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Sotib olish narxi</label>
+            <div>
+              <label className="stat-label" style={{ marginBottom: '0.75rem', display: 'block', fontSize: '0.85rem' }}>SOTIB OLISH NARXI</label>
               <div style={{ position: 'relative' }}>
-                <Tag size={16} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#666' }} />
-                <input type="number" step="any" className="premium-input" value={newProduct.buy_price} onChange={e => setNewProduct({...newProduct, buy_price: e.target.value})} required />
+                <input type="number" step="any" className="premium-input" style={{ height: '55px', color: 'var(--accent-gold)', fontWeight: '800' }} value={newProduct.buy_price} onChange={e => setNewProduct({...newProduct, buy_price: e.target.value})} required />
+                <span style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700' }}>UZS</span>
               </div>
             </div>
 
-            <div className="stat-item">
-              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Sotish narxi</label>
-              <input type="number" step="any" className="premium-input" value={newProduct.sell_price} onChange={e => setNewProduct({...newProduct, sell_price: e.target.value})} required />
-            </div>
-
-            <div className="stat-item">
-              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>
-                {newProduct.unit === 'litr' ? 'Umumiy Hajmi (Necha Litr?)' : 
-                 newProduct.unit === 'kg' ? 'Umumiy Vazni (Necha kg?)' : 
-                 newProduct.unit === 'metr' ? 'Umumiy Uzunligi (Necha metr?)' : 
-                 newProduct.unit === 'quti' ? 'Necha Quti/Pachka?' : 'Dastlabki Miqdor (Dona)'}
-              </label>
-              <input type="number" step="any" className="premium-input" placeholder={newProduct.unit === 'dona' ? '100' : 'Masalan: 1.5'} value={newProduct.stock} onChange={e => setNewProduct({...newProduct, stock: e.target.value})} required />
-            </div>
-
-            <div className="stat-item">
-              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Shtrix-kod (Barcode)</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input className="premium-input" placeholder="Skanerlang yoki kiriting..." value={newProduct.barcode} onChange={e => setNewProduct({...newProduct, barcode: e.target.value})} />
-                <button type="button" className="btn-premium btn-ghost" onClick={() => setNewProduct({...newProduct, barcode: Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0')})}>
-                  <RefreshCcw size={16} />
-                </button>
+            <div>
+              <label className="stat-label" style={{ marginBottom: '0.75rem', display: 'block', fontSize: '0.85rem' }}>SOTISH NARXI</label>
+              <div style={{ position: 'relative' }}>
+                <input type="number" step="any" className="premium-input" style={{ height: '55px', color: 'var(--accent-emerald)', fontWeight: '800' }} value={newProduct.sell_price} onChange={e => setNewProduct({...newProduct, sell_price: e.target.value})} required />
+                <span style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700' }}>UZS</span>
               </div>
             </div>
 
-            <div style={{ gridColumn: '1 / -1', marginTop: '1rem' }}>
-              <button type="submit" className="btn-premium" style={{ width: '100%', justifyContent: 'center' }}>
-                <Save size={20} /> {editingProduct ? "Yangilash" : "Tovarni Omborga Qo'shish"}
+            <div>
+              <label className="stat-label" style={{ marginBottom: '0.75rem', display: 'block', fontSize: '0.85rem' }}>MIQDOR (STOK)</label>
+              <input type="number" step="any" className="premium-input" style={{ height: '55px' }} value={newProduct.stock} onChange={e => setNewProduct({...newProduct, stock: e.target.value})} required />
+            </div>
+
+            <div>
+              <label className="stat-label" style={{ marginBottom: '0.75rem', display: 'block', fontSize: '0.85rem' }}>OMBOR</label>
+              <select className="premium-input" style={{ height: '55px' }} value={newProduct.warehouse} onChange={e => setNewProduct({...newProduct, warehouse: e.target.value})}>
+                <option value="Asosiy Ombor">Asosiy Ombor</option>
+                <option value="Toshkent Filiali">Toshkent Filiali</option>
+                <option value="Samarqand Filiali">Samarqand Filiali</option>
+              </select>
+            </div>
+
+            <div style={{ gridColumn: '1 / -1', marginTop: '1.5rem' }}>
+              <button type="submit" className="btn-premium" style={{ width: '100%', padding: '1.5rem', fontSize: '1.2rem', justifyContent: 'center' }}>
+                <Save size={24} /> {editingProduct ? "MAHSULOTNI YANGILASH" : "OMBORGA QO'SHISH"}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <h3>Barcha Maxsulotlar</h3>
-            <button className="btn-premium btn-ghost" style={{ padding: '0.4rem 0.8rem', color: '#ef4444', fontSize: '0.8rem' }} onClick={handleDeleteAll}>
-              <Trash2 size={14} /> Barchasini O'chirish
-            </button>
+      <div className="glass-card" style={{ padding: '3rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', letterSpacing: '-0.5px' }} className="text-gradient">Ombor Inventarizatsiyasi</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>Jami {products.length} turdagi mahsulotlar mavjud</p>
           </div>
-          <div style={{ position: 'relative', width: '350px' }}>
-            <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#666' }} />
-            <input className="premium-input" style={{ paddingLeft: '3rem' }} placeholder="Nomi yoki SKU bo'yicha qidirish..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+             <div style={{ position: 'relative', width: '350px' }}>
+              <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-gold)' }} />
+              <input className="premium-input" style={{ paddingLeft: '3.5rem', height: '50px' }} placeholder="Qidirish..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            </div>
+            <button className="btn-premium btn-ghost" style={{ color: '#ef4444', height: '50px', padding: '0 1.5rem' }} onClick={handleDeleteAll}>
+              <Trash2 size={20} />
+            </button>
           </div>
         </div>
 
@@ -218,56 +207,65 @@ const Admin = () => {
           <table className="premium-table">
             <thead>
               <tr>
-                <th>Tovar / SKU</th>
+                <th>Mahsulot va SKU</th>
                 <th>Kategoriya</th>
-                <th>Ombor</th>
-                <th>Narxi</th>
+                <th>Ombor Manzili</th>
+                <th>Narxlar</th>
                 <th>Zaxira</th>
                 <th>Holat</th>
-                <th>Amallar</th>
+                <th>Boshqaruv</th>
               </tr>
             </thead>
             <tbody>
               {filteredProducts.map(p => (
                 <tr key={p.id}>
                   <td>
-                    <div style={{ fontWeight: '700', fontSize: '1rem' }}>{p.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>SKU: {p.sku || 'N/A'}</div>
+                    <div style={{ fontWeight: '800', fontSize: '1.05rem', color: '#fff' }}>{p.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: '600' }}>#{p.sku || 'N/A'}</div>
                   </td>
                   <td>
-                    <span style={{ background: 'rgba(212, 175, 55, 0.1)', color: '#d4af37', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '600' }}>
+                    <span style={{ 
+                      background: 'rgba(255,255,255,0.03)', 
+                      padding: '6px 12px', 
+                      borderRadius: '10px', 
+                      fontSize: '0.75rem', 
+                      fontWeight: '800',
+                      color: 'var(--accent-gold)',
+                      border: '1px solid var(--glass-border)'
+                    }}>
                       {p.category}
                     </span>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                      <Warehouse size={14} color="#666" /> {p.warehouse}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                      <Warehouse size={16} color="var(--accent-gold)" /> {p.warehouse}
                     </div>
                   </td>
-                  <td style={{ fontWeight: '700', color: 'white' }}>
-                    {parseInt(p.sell_price).toLocaleString()} <small>so'm</small>
+                  <td>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)', fontWeight: '800' }}>{parseInt(p.sell_price).toLocaleString()} <small>UZS</small></div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Sotib olish: {parseInt(p.buy_price).toLocaleString()}</div>
                   </td>
                   <td>
-                    <div style={{ fontWeight: '700', fontSize: '1.1rem' }}>{p.stock} <small style={{fontSize: '0.7rem', color: '#666'}}>{p.unit || 'ta'}</small></div>
+                    <div style={{ fontWeight: '900', fontSize: '1.25rem' }}>{p.stock} <small style={{fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '500'}}>{p.unit || 'ta'}</small></div>
                   </td>
                   <td>
                     {p.stock <= (p.min_stock || 5) ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontSize: '0.8rem', fontWeight: '700' }}>
-                        <AlertTriangle size={14} /> Kam Qolgan
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontSize: '0.8rem', fontWeight: '800', background: 'rgba(239, 68, 68, 0.1)', padding: '6px 12px', borderRadius: '10px' }}>
+                        <AlertTriangle size={16} /> KRITIK
                       </div>
                     ) : (
-                      <div style={{ color: '#10b981', fontSize: '0.8rem', fontWeight: '700' }}>Etarli</div>
+                      <div style={{ color: 'var(--accent-emerald)', fontSize: '0.8rem', fontWeight: '800', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 12px', borderRadius: '10px', width: 'fit-content' }}>FAOL</div>
                     )}
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="btn-premium btn-ghost" style={{ padding: '0.5rem' }} onClick={() => {
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <button className="btn-premium btn-ghost" style={{ padding: '0.6rem', color: 'var(--accent-gold)' }} onClick={() => {
                         setEditingProduct(p);
                         setNewProduct(p);
                         setShowAddForm(true);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}><Edit size={16} /></button>
-                      <button className="btn-premium btn-ghost" style={{ padding: '0.5rem', color: '#ef4444' }} onClick={() => handleDelete(p.id)}><Trash2 size={16} /></button>
+                      }}><Edit size={18} /></button>
+                      <button className="btn-premium btn-ghost" style={{ padding: '0.6rem', color: '#ef4444' }} onClick={() => handleDelete(p.id)}><Trash2 size={18} /></button>
                     </div>
                   </td>
                 </tr>
