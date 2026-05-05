@@ -16,7 +16,15 @@ import {
 import { useStore } from '../context/StoreContext';
 
 const Analytics = () => {
-  const { analytics, salesHistory, fetchAnalytics, fetchSalesHistory, loading } = useStore();
+  const { 
+    analytics, 
+    salesHistory, 
+    predictions,
+    fetchAnalytics, 
+    fetchSalesHistory, 
+    fetchPredictions,
+    loading 
+  } = useStore();
   
   const data = Array.isArray(analytics) ? analytics : [];
   const sales = Array.isArray(salesHistory) ? salesHistory : [];
@@ -24,6 +32,7 @@ const Analytics = () => {
   useEffect(() => {
     fetchAnalytics().catch(err => console.error("Fetch error:", err));
     fetchSalesHistory().catch(() => {});
+    fetchPredictions().catch(() => {});
   }, []);
 
   const totalRevenue = useMemo(() =>
@@ -142,6 +151,47 @@ const Analytics = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '700' }}>
             <Trophy size={16} /> O'rtacha chek: <span style={{color: 'var(--accent-gold)'}}>{(totalOrders > 0 ? Math.round(totalRevenue/totalOrders) : 0).toLocaleString()} UZS</span>
           </div>
+        </div>
+      </div>
+
+      {/* Predictive Analytics Section - ODE Model */}
+      <div style={{ marginBottom: '4rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+          <div style={{ width: '45px', height: '45px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-purple)' }}>
+            <BrainCircuit size={24} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '800' }}>Ilmiy Bashorat (Differensial Model)</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>dS/dt = rS (Malthusian Growth) modeli asosida kelajakdagi daromad prognozi.</p>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
+          {(predictions || []).slice(0, 3).map((p, idx) => (
+            <div key={idx} className="glass-card" style={{ padding: '2rem', background: 'linear-gradient(165deg, rgba(139, 92, 246, 0.05) 0%, rgba(5, 10, 15, 0.4) 100%)' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                 <span style={{ fontWeight: '800', color: '#fff' }}>{p.product_name}</span>
+                 <span style={{ fontSize: '0.7rem', background: 'var(--accent-purple)', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontWeight: '900' }}>{p.model}</span>
+               </div>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '800', marginBottom: '4px' }}>JORIY DAROMAD</div>
+                    <div style={{ fontWeight: '900', fontSize: '1.1rem' }}>{p.current_revenue.toLocaleString()}</div>
+                  </div>
+                  <div style={{ width: '1px', height: '30px', background: 'var(--glass-border)' }}></div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--accent-emerald)', fontWeight: '800', marginBottom: '4px' }}>1 OYDAN KEYIN</div>
+                    <div style={{ fontWeight: '900', fontSize: '1.1rem', color: 'var(--accent-emerald)' }}>{p.forecast_next_month.toLocaleString()}</div>
+                  </div>
+               </div>
+               <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-secondary)' }}>3 oylik prognoz:</span>
+                    <span style={{ fontWeight: '900', color: 'var(--accent-gold)' }}>{p.forecast_3_months.toLocaleString()} UZS</span>
+                 </div>
+               </div>
+            </div>
+          ))}
         </div>
       </div>
 

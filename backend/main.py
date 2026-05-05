@@ -114,6 +114,49 @@ def run_advanced_analytics():
         print(f"CRITICAL ANALYTICS ERROR: {e}")
         return False
 
+def calculate_predictive_modeling():
+    """
+    Applies Differential Equation modeling for sales forecasting.
+    Model: dS/dt = r * S (Malthusian Growth Model)
+    Solution: S(t) = S0 * e^(r*t)
+    Where S0 is current sales, r is growth rate, t is future time steps.
+    """
+    try:
+        if not PATHS["analytics"].exists(): return []
+        
+        with open(PATHS["analytics"], "r", encoding="utf-8") as f:
+            data = json.load(f)
+            
+        if not data: return []
+        
+        predictions = []
+        for item in data:
+            s0 = float(item.get('total_revenue', 0))
+            # Growth rate 'r' derived from historical growth_percent
+            # growth_percent is (S1 - S0)/S0 * 100
+            # So r = growth_percent / 100
+            r = float(item.get('growth_percent', 0)) / 100.0
+            
+            # Predict for next 3 periods (t=1, 2, 3)
+            # S(t) = S0 * exp(r * t)
+            forecasts = []
+            for t in range(1, 4):
+                val = s0 * np.exp(r * t)
+                forecasts.append(round(val, 2))
+                
+            predictions.append({
+                "product_name": item.get('product_name'),
+                "current_revenue": s0,
+                "growth_rate": r,
+                "forecast_next_month": forecasts[0],
+                "forecast_3_months": forecasts[2],
+                "model": "ODE (dS/dt = rS)"
+            })
+        return predictions
+    except Exception as e:
+        print(f"PREDICTIVE ERROR: {e}")
+        return []
+
 # --- API ENDPOINTS ---
 
 @app.get("/health")
@@ -194,6 +237,10 @@ async def get_analytics():
     if not PATHS["analytics"].exists(): return []
     with open(PATHS["analytics"], "r", encoding="utf-8") as f:
         return json.load(f)
+
+@app.get("/api/predictions")
+async def get_predictions():
+    return calculate_predictive_modeling()
 
 @app.get("/api/settings")
 async def get_settings():

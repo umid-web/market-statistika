@@ -15,6 +15,7 @@ export const StoreProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [settings, setSettings] = useState({});
+  const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchProducts = async () => {
@@ -35,9 +36,18 @@ export const StoreProvider = ({ children }) => {
       }
     } catch (err) {
       console.error("Analytics fetch error:", err);
-      setAnalytics([]); // Error bo'lganda bo'sh massiv qaytaramiz
+      setAnalytics([]); 
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPredictions = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/predictions`);
+      setPredictions(res.data);
+    } catch (err) {
+      console.error("Prediction fetch error:", err);
     }
   };
 
@@ -61,7 +71,7 @@ export const StoreProvider = ({ children }) => {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([fetchProducts(), fetchAnalytics(), fetchSalesHistory(), fetchSettings()])
+    Promise.all([fetchProducts(), fetchAnalytics(), fetchSalesHistory(), fetchSettings(), fetchPredictions()])
       .finally(() => setLoading(false));
   }, []);
 
@@ -119,8 +129,8 @@ export const StoreProvider = ({ children }) => {
 
   return (
     <StoreContext.Provider value={{
-      user, setUser, products, analytics, salesHistory, cart, notifications, loading, settings,
-      fetchProducts, fetchAnalytics, fetchSalesHistory, fetchSettings, addNotification, addToCart, removeFromCart, clearCart, updateCartQuantity,
+      user, setUser, products, analytics, salesHistory, cart, notifications, loading, settings, predictions,
+      fetchProducts, fetchAnalytics, fetchSalesHistory, fetchSettings, fetchPredictions, addNotification, addToCart, removeFromCart, clearCart, updateCartQuantity,
       setLoading
     }}>
       {children}
