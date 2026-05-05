@@ -17,23 +17,117 @@ const Dashboard = () => {
     user
   } = useStore();
 
+  const [timeFilter, setTimeFilter] = React.useState('all');
+
   useEffect(() => {
     fetchProducts();
     fetchSalesHistory();
     fetchAnalytics();
   }, []);
 
+  // Filter sales history based on time period
+  const filteredSales = React.useMemo(() => {
+    if (!salesHistory) return [];
+    if (timeFilter === 'all') return salesHistory;
+
+    const now = new Date();
+    return salesHistory.filter(order => {
+      const orderDate = new Date(order.order_date);
+      if (isNaN(orderDate.getTime())) return false;
+
+      switch (timeFilter) {
+        case 'day':
+          return orderDate.toDateString() === now.toDateString();
+        case 'week':
+          const oneWeekAgo = new Date();
+          oneWeekAgo.setDate(now.getDate() - 7);
+          return orderDate >= oneWeekAgo;
+        case 'month':
+          return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+        case 'year':
+          return orderDate.getFullYear() === now.getFullYear();
+        default:
+          return true;
+      }
+    });
+  }, [salesHistory, timeFilter]);
+
   // KPIs calculation
-  const totalRevenue = (salesHistory || []).reduce((acc, order) => acc + (Number(order.total) || 0), 0);
-  const totalOrders = (salesHistory || []).length;
+  const totalRevenue = React.useMemo(() => 
+    filteredSales.reduce((acc, order) => acc + (Number(order.sell_price * order.quantity) || 0), 0)
+  , [filteredSales]);
+
+  const totalOrders = React.useMemo(() => 
+    [...new Set(filteredSales.map(s => s.order_id))].length
+  , [filteredSales]);
+
   const totalProducts = (products || []).length;
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+  const avgOrderValue = React.useMemo(() => 
+    totalOrders > 0 ? totalRevenue / totalOrders : 0
+  , [totalRevenue, totalOrders]);
+
+  // Trend calculation
+  const { revenueTrend, ordersTrend } = React.useMemo(() => {
+    if (!salesHistory || timeFilter === 'all') return { revenueTrend: '0.0%', ordersTrend: '0.0%' };
+
+    const now = new Date();
+    let prevStart, prevEnd;
+
+    switch (timeFilter) {
+      case 'day':
+        prevStart = new Date(now); prevStart.setDate(now.getDate() - 1); prevStart.setHours(0,0,0,0);
+        prevEnd = new Date(now); prevEnd.setDate(now.getDate() - 1); prevEnd.setHours(23,59,59,999);
+        break;
+      case 'week':
+        prevStart = new Date(now); prevStart.setDate(now.getDate() - 14);
+        prevEnd = new Date(now); prevEnd.setDate(now.getDate() - 7);
+        break;
+      case 'month':
+        prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        prevEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+        break;
+      case 'year':
+        prevStart = new Date(now.getFullYear() - 1, 0, 1);
+        prevEnd = new Date(now.getFullYear() - 1, 11, 31);
+        break;
+      default:
+        return { revenueTrend: '0.0%', ordersTrend: '0.0%' };
+    }
+
+    const prevSales = salesHistory.filter(s => {
+      const d = new Date(s.order_date);
+      return d >= prevStart && d <= prevEnd;
+    });
+
+    const prevRev = prevSales.reduce((acc, s) => acc + (Number(s.sell_price * s.quantity) || 0), 0);
+    const prevOrd = [...new Set(prevSales.map(s => s.order_id))].length;
+
+    const calcPercent = (curr, prev) => {
+      if (prev === 0) return curr > 0 ? '+100%' : '0.0%';
+      const p = ((curr - prev) / prev) * 100;
+      return (p >= 0 ? '+' : '') + p.toFixed(1) + '%';
+    };
+
+    return {
+      revenueTrend: calcPercent(totalRevenue, prevRev),
+      ordersTrend: calcPercent(totalOrders, prevOrd)
+    };
+  }, [salesHistory, timeFilter, totalRevenue, totalOrders]);
+
+  const periodLabels = {
+    day: 'Bugungi',
+    week: 'Haftalik',
+    month: 'Oylik',
+    year: 'Yillik',
+    all: 'Jami'
+  };
 
   const kpis = [
-    { title: "Jami Tushum", value: `${totalRevenue.toLocaleString()}`, unit: "so'm", icon: DollarSign, trend: "+12.5%", color: "#10b981", bg: "rgba(16, 185, 129, 0.1)" },
-    { title: "Buyurtmalar", value: totalOrders.toLocaleString(), unit: "ta", icon: ShoppingCart, trend: "+5.2%", color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },
+    { title: `${periodLabels[timeFilter]} Tushum`, value: `${totalRevenue.toLocaleString()}`, unit: "so'm", icon: DollarSign, trend: revenueTrend, color: "#10b981", bg: "rgba(16, 185, 129, 0.1)" },
+    { title: `${periodLabels[timeFilter]} Buyurtmalar`, value: totalOrders.toLocaleString(), unit: "ta", icon: ShoppingCart, trend: ordersTrend, color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },
     { title: "Mahsulotlar", value: totalProducts.toLocaleString(), unit: "tur", icon: Package, trend: "0.0%", color: "#d4af37", bg: "rgba(212, 175, 55, 0.1)" },
-    { title: "O'rtacha Chek", value: `${Math.round(avgOrderValue).toLocaleString()}`, unit: "so'm", icon: TrendingUp, trend: "+2.1%", color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)" },
+    { title: "O'rtacha Chek", value: `${Math.round(avgOrderValue).toLocaleString()}`, unit: "so'm", icon: TrendingUp, trend: revenueTrend, color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)" },
   ];
 
   // Process data for charts
@@ -104,12 +198,39 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-view" style={{ animation: 'fadeIn 0.5s ease' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <Header onRefresh={fetchAnalytics} />
+        <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+          {[
+            { id: 'day', label: 'Kun' },
+            { id: 'week', label: 'Hafta' },
+            { id: 'month', label: 'Oy' },
+            { id: 'year', label: 'Yil' },
+            { id: 'all', label: 'Hammasi' }
+          ].map(f => (
+            <button
+              key={f.id}
+              onClick={() => setTimeFilter(f.id)}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                border: 'none',
+                background: timeFilter === f.id ? '#8b5cf6' : 'transparent',
+                color: timeFilter === f.id ? 'white' : '#888',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
         <button 
           className="btn-premium btn-ghost" 
           onClick={fetchAnalytics}
-          style={{ marginTop: '0.5rem' }}
+          style={{ marginTop: '0' }}
         >
           <RefreshCcw size={18} /> Yangilash
         </button>
