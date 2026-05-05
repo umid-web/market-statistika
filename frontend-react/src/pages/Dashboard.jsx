@@ -14,6 +14,7 @@ const Dashboard = () => {
     fetchProducts, 
     fetchSalesHistory, 
     fetchAnalytics,
+    loading,
     user
   } = useStore();
 
