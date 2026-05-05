@@ -327,32 +327,35 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
+      <div className="glass-card" style={{ padding: '0', overflow: 'hidden', marginTop: '2rem' }}>
         <DataTable data={filteredAnalytics} />
       </div>
 
-      <div className="glass-card" style={{ marginTop: '2rem' }}>
-        <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Oxirgi Tranzaksiyalar</h3>
-          <button className="btn-premium btn-ghost" style={{ fontSize: '0.8rem' }}>Hammasini Ko'rish</button>
+      <div className="glass-card" style={{ marginTop: '3rem', padding: '2.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', letterSpacing: '-0.5px' }} className="text-gradient">Oxirgi Tranzaksiyalar</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.4rem' }}>Tizimga kelib tushgan so'nggi savdo amaliyotlari</p>
+          </div>
+          <button className="btn-premium btn-ghost" style={{ fontSize: '0.8rem', padding: '0.7rem 1.5rem' }}>Hammasini Ko'rish</button>
         </div>
         <div style={{ overflowX: 'auto' }}>
           <table className="premium-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>ID raqami</th>
                 <th>Mijoz</th>
                 <th>Sana</th>
-                <th>Summa</th>
+                <th>Umumiy Summa</th>
               </tr>
             </thead>
             <tbody>
               {(salesHistory || []).slice(0, 5).map((sale, idx) => (
                 <tr key={idx}>
-                  <td style={{ fontWeight: '700', color: '#8b5cf6' }}>{sale.order_id}</td>
-                  <td>MEHMON</td>
-                  <td>{new Date(sale.order_date).toLocaleDateString()}</td>
-                  <td style={{ fontWeight: '800', color: '#10b981' }}>{(sale.sell_price * sale.quantity).toLocaleString()} so'm</td>
+                  <td style={{ fontWeight: '800', color: 'var(--accent-purple)' }}>{sale.order_id}</td>
+                  <td style={{ fontWeight: '600', color: '#fff' }}>MEHMON</td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{new Date(sale.order_date).toLocaleDateString('uz-UZ')}</td>
+                  <td style={{ fontWeight: '800', color: 'var(--accent-emerald)' }}>{(sale.sell_price * sale.quantity).toLocaleString()} so'm</td>
                 </tr>
               ))}
             </tbody>

@@ -4,18 +4,11 @@ import * as XLSX from 'xlsx';
 
 const DataTable = ({ data }) => {
   const handleExport = () => {
-    const excelData = data.slice(0, 10).map((row, idx) => ({
-      'Reyting (Spark)': row.profit_rank || (idx + 1),
-      'Maxsulot Nomi': row.product_name || '-',
-      'Hisobot Oyi': row.order_month,
-      'Kategoriya': row.category || '-',
-      'Sotuv Miqdori (ta)': row.total_quantity || 0,
-      "Jami Tushum (so'm)": row.total_revenue || 0,
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Analytics");
-    XLSX.writeFile(workbook, "V_ERP_Pro_Analytics.xlsx");
+    XLSX.writeFile(workbook, "V_ERP_Pro_Tahlil.xlsx");
   };
 
   return (
@@ -24,12 +17,12 @@ const DataTable = ({ data }) => {
         <div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: '800', letterSpacing: '-1px', display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <FileSpreadsheet size={28} className="text-gold" />
-            <span className="text-gradient">Performance Analytics</span>
+            <span className="text-gradient">Maxsulotlar Tahlili</span>
           </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.5rem' }}>Top performing products and their monthly growth dynamics</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.5rem' }}>Eng foydali maxsulotlar va ularning oylik o'sish dinamikasi</p>
         </div>
         <button className="btn-premium" onClick={exportToExcel} style={{ fontSize: '0.8rem', padding: '0.7rem 1.5rem' }}>
-          <FileSpreadsheet size={18} /> Export Data
+          <FileSpreadsheet size={18} /> Eksport (Excel)
         </button>
       </div>
 
@@ -37,14 +30,14 @@ const DataTable = ({ data }) => {
         <table className="premium-table">
           <thead>
             <tr>
-              <th>Rank</th>
-              <th>Product Name</th>
-              <th>Month</th>
-              <th>Category</th>
-              <th>Volume</th>
-              <th>Revenue</th>
-              <th>Net Profit</th>
-              <th>Dynamics</th>
+              <th>Reyting</th>
+              <th>Maxsulot Nomi</th>
+              <th>Hisobot Oyi</th>
+              <th>Kategoriya</th>
+              <th>Miqdor</th>
+              <th>Jami Tushum</th>
+              <th>Sof Foyda</th>
+              <th>Dinamika</th>
             </tr>
           </thead>
           <tbody>
@@ -63,7 +56,7 @@ const DataTable = ({ data }) => {
                     {row.profit_rank || (idx + 1)}
                   </div>
                 </td>
-                <td style={{ fontWeight: '700', color: '#fff' }}>{row.product_name || 'Unknown'}</td>
+                <td style={{ fontWeight: '700', color: '#fff' }}>{row.product_name || 'Noma\'lum'}</td>
                 <td>
                   <span style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>{row.order_month || '-'}</span>
                 </td>
@@ -79,9 +72,9 @@ const DataTable = ({ data }) => {
                     {row.category || '-'}
                   </span>
                 </td>
-                <td style={{ fontWeight: '700' }}>{row.total_quantity || 0} units</td>
-                <td style={{ fontWeight: '800', color: 'var(--accent-emerald)' }}>{(row.total_revenue || 0).toLocaleString()} <small>UZS</small></td>
-                <td style={{ fontWeight: '800', color: 'var(--accent-gold)' }}>{(row.total_profit || 0).toLocaleString()} <small>UZS</small></td>
+                <td style={{ fontWeight: '700' }}>{row.total_quantity || 0} ta</td>
+                <td style={{ fontWeight: '800', color: 'var(--accent-emerald)' }}>{(row.total_revenue || 0).toLocaleString()} <small>so'm</small></td>
+                <td style={{ fontWeight: '800', color: 'var(--accent-gold)' }}>{(row.total_profit || 0).toLocaleString()} <small>so'm</small></td>
                 <td>
                   <div style={{ 
                     color: (row.growth_percent || 0) > 0 ? 'var(--accent-emerald)' : (row.growth_percent || 0) < 0 ? '#ef4444' : 'var(--text-muted)', 
