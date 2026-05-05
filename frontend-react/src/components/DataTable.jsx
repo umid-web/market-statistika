@@ -1,9 +1,8 @@
 import React from 'react';
-import { FileSpreadsheet, Star, Trophy } from 'lucide-react';
+import { FileSpreadsheet, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 const DataTable = ({ data }) => {
-  const handleExport = () => {
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
