@@ -71,12 +71,12 @@ const DataTable = ({ data }) => {
                     {row.profit_rank || (idx + 1)}
                   </div>
                 </td>
-                <td style={{ fontWeight: '700' }}>{row.product_name}</td>
-                <td>{row.order_month}</td>
-                <td style={{ color: 'var(--text-secondary)' }}>{row.category}</td>
-                <td style={{ fontWeight: '700' }}>{row.total_quantity} ta</td>
-                <td style={{ color: '#10b981', fontWeight: '800' }}>{row.total_revenue?.toLocaleString()} so'm</td>
-                <td style={{ color: '#d4af37', fontWeight: '800' }}>{row.total_profit?.toLocaleString()} so'm</td>
+                <td style={{ fontWeight: '700' }}>{row.product_name || 'Noma\'lum'}</td>
+                <td>{row.order_month || '-'}</td>
+                <td style={{ color: 'var(--text-secondary)' }}>{row.category || '-'}</td>
+                <td style={{ fontWeight: '700' }}>{row.total_quantity || 0} ta</td>
+                <td style={{ color: '#10b981', fontWeight: '800' }}>{(row.total_revenue || 0).toLocaleString()} so'm</td>
+                <td style={{ color: '#d4af37', fontWeight: '800' }}>{(row.total_profit || 0).toLocaleString()} so'm</td>
                 <td>
                   <div style={{ 
                     color: (row.growth_percent || 0) >= 0 ? '#10b981' : '#ef4444', 
@@ -89,7 +89,7 @@ const DataTable = ({ data }) => {
                     borderRadius: '12px',
                     width: 'fit-content'
                   }}>
-                    {(row.growth_percent || 0) > 0 ? '+' : ''}{(row.growth_percent || 0)}%
+                    {(row.growth_percent || 0) > 0 ? '+' : ''}{(row.growth_percent || 0).toFixed(1)}%
                   </div>
                 </td>
               </tr>

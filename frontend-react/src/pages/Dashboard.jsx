@@ -161,6 +161,21 @@ const Dashboard = () => {
       .map(item => ({ name: item.product_name, value: item.total_profit }));
   }, [analytics]);
 
+  // Filtrangan tahlillar (DataTable uchun)
+  const filteredAnalytics = React.useMemo(() => {
+    if (!analytics) return [];
+    // Faqat joriy oydagi yoki oxirgi oydagi ma'lumotlarni ko'rsatamiz
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    
+    let result = analytics.filter(item => item.order_month === currentMonth);
+    
+    // Agar joriy oyda savdo bo'lmasa, hammasini ko'rsatamiz lekin tartiblangan holda
+    if (result.length === 0) result = [...analytics];
+    
+    return result.sort((a, b) => b.total_profit - a.total_profit);
+  }, [analytics]);
+
   // Oylik o'sishni hisoblash (Growth Calculation)
   const { growthPercent, growthColor } = React.useMemo(() => {
     let percent = 0;
@@ -302,11 +317,36 @@ const Dashboard = () => {
       </div>
 
       <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
+        <DataTable data={filteredAnalytics} />
+      </div>
+
+      <div className="glass-card" style={{ marginTop: '2rem' }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Oxirgi Tranzaksiyalar</h3>
-          <button className="btn-premium btn-ghost" style={{ fontSize: '0.8rem' }} onClick={() => window.navigateTo('archive')}>Hammasini Ko'rish</button>
+          <button className="btn-premium btn-ghost" style={{ fontSize: '0.8rem' }}>Hammasini Ko'rish</button>
         </div>
-        <DataTable data={(salesHistory || []).slice(0, 5)} />
+        <div style={{ overflowX: 'auto' }}>
+          <table className="premium-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Mijoz</th>
+                <th>Sana</th>
+                <th>Summa</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(salesHistory || []).slice(0, 5).map((sale, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: '700', color: '#8b5cf6' }}>{sale.order_id}</td>
+                  <td>MEHMON</td>
+                  <td>{new Date(sale.order_date).toLocaleDateString()}</td>
+                  <td style={{ fontWeight: '800', color: '#10b981' }}>{(sale.sell_price * sale.quantity).toLocaleString()} so'm</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
