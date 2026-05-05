@@ -1,6 +1,6 @@
 # 📊 Market Statistika — Big Data Analytics Platform
 
-> **Hadoop + Apache Spark + React** yordamida qurilgan professional savdo bozori tahlil platformasi (V-ERP Pro).
+> **Hadoop + Apache Spark + React** yordamida qurilgan professional savdo bozori tahlil platformasi (TijoratPro).
 
 ![Platform Preview](https://img.shields.io/badge/Stack-Hadoop%20%7C%20Spark%20%7C%20React-blue?style=for-the-badge)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-yellow?style=for-the-badge&logo=python)

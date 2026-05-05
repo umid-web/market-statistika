@@ -67,7 +67,7 @@ const Settings = () => {
     currency: 'UZS',
     address: '',
     admin_name: 'Admin',
-    admin_email: 'admin@v-erp.com',
+    admin_email: 'admin@tijoratpro.com',
     lock_pin: '1234',
     cashier_pin: '0000',
     email_alerts: true,
@@ -157,7 +157,7 @@ const Settings = () => {
             <span style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px' }}>System Configuration</span>
           </div>
           <h1 className="text-gradient" style={{ fontSize: '3rem', fontWeight: '800', letterSpacing: '-2px', marginBottom: '0.5rem' }}>Tizim Sozlamalari</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>V-ERP Pro platformasini sozlash, xavfsizlik va tizim boshqaruvi.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>TijoratPro platformasini sozlash, xavfsizlik va tizim boshqaruvi.</p>
         </div>
         <button
           className="btn-premium"
@@ -262,7 +262,7 @@ const Settings = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.75rem' }}>
                   <div style={{ gridColumn: '1 / -1' }}>
                     <FieldGroup label="Do'kon Nomi" hint="Bu nom chek va hisobotlarda ko'rinadi.">
-                      <input type="text" style={inputStyle} value={settings.store_name || ''} onChange={e => setSettings({ ...settings, store_name: e.target.value })} placeholder="Masalan: V-ERP Savdo Markazi" />
+                      <input type="text" style={inputStyle} value={settings.store_name || ''} onChange={e => setSettings({ ...settings, store_name: e.target.value })} placeholder="Masalan: TijoratPro Savdo Markazi" />
                     </FieldGroup>
                   </div>
                   <div>
@@ -432,7 +432,7 @@ const Settings = () => {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   {[
-                    { label: 'Platforma', value: 'V-ERP Pro v2.0' },
+                    { label: 'Platforma', value: 'TijoratPro v2.0' },
                     { label: 'Frontend', value: 'React 18 + Vite' },
                     { label: 'Backend', value: 'FastAPI + Pandas' },
                     { label: 'Analytics', value: 'Apache Spark' },

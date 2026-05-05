@@ -74,7 +74,7 @@ def run_analytics_with_spark(input_path, output_path, checkpoint_path):
         os.environ["PATH"] = str(hadoop_home / "bin") + os.pathsep + os.environ.get("PATH", "")
 
     spark = SparkSession.builder \
-        .appName("V-ERP-Pro-Analytics") \
+        .appName("TijoratPro-Analytics") \
         .master("local[*]") \
         .config("spark.driver.memory", "1g") \
         .config("spark.sql.shuffle.partitions", "1") \

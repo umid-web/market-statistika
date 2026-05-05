@@ -8,7 +8,7 @@ import json
 import shutil
 import os
 
-app = FastAPI(title="V-ERP Pro System")
+app = FastAPI(title="TijoratPro System")
 
 app.add_middleware(
     CORSMiddleware,

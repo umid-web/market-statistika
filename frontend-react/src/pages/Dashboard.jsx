@@ -274,7 +274,7 @@ const Dashboard = () => {
             <BrainCircuit size={24} color="#fff" />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'white' }}>V-ERP AI Intelligent Assistant</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'white' }}>TijoratPro AI Intelligent Assistant</h2>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Spark Big Data algoritmlari asosidagi real-vaqt tavsiyalari</p>
           </div>
         </div>

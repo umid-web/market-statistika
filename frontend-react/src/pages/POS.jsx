@@ -149,7 +149,7 @@ const POS = () => {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(20px)' }}>
           <div className="glass-card animate-float" style={{ width: '450px', padding: '3rem', display: 'flex', flexDirection: 'column', gap: '2rem', border: '1px solid var(--accent-gold-glow)' }}>
             <div style={{ textAlign: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '2rem' }}>
-              <h2 className="text-gold" style={{ fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-2px', marginBottom: '0.5rem' }}>V-ERP PRO</h2>
+              <h2 className="text-gold" style={{ fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-2px', marginBottom: '0.5rem' }}>TIJORATPRO</h2>
               <div style={{ background: 'var(--accent-gold-soft)', color: 'var(--accent-gold)', padding: '4px 12px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: '800', width: 'fit-content', margin: '0 auto', textTransform: 'uppercase', letterSpacing: '1px' }}>Official Receipt</div>
             </div>
             
@@ -186,7 +186,7 @@ const POS = () => {
               <button className="btn-premium btn-ghost" style={{ flex: 1 }} onClick={() => {
                 const doc = new jsPDF({ format: [80, 200] });
                 doc.setFontSize(14);
-                doc.text("V-ERP PRO STORE", 40, 10, { align: 'center' });
+                doc.text("TIJORATPRO STORE", 40, 10, { align: 'center' });
                 doc.setFontSize(10);
                 doc.text(`Sana: ${receiptData.date}`, 5, 20);
                 doc.text(`Chek ID: ${receiptData.order_id}`, 5, 25);

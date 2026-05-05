@@ -43,7 +43,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: '1.4rem', fontWeight: '800', letterSpacing: '-1px', lineHeight: '1' }}>
-            V-ERP <span className="text-gold" style={{ fontSize: '1.4rem' }}>PRO</span>
+            Tijorat <span className="text-gold" style={{ fontSize: '1.4rem' }}>Pro</span>
           </span>
           <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px', marginTop: '4px' }}>Enterprise</span>
         </div>

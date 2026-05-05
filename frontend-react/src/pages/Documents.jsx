@@ -41,7 +41,7 @@ const Documents = () => {
   const generateSinglePDF = (sale, autoPrint = false) => {
     const doc = new jsPDF({ format: [80, 200] });
     doc.setFontSize(14);
-    doc.text("V-ERP PRO STORE", 40, 10, { align: 'center' });
+    doc.text("TIJORATPRO STORE", 40, 10, { align: 'center' });
     doc.setFontSize(10);
     doc.text(`Sana: ${sale.order_date}`, 5, 20);
     doc.text(`Chek ID: ${sale.order_id}`, 5, 25);
@@ -115,7 +115,7 @@ const Documents = () => {
               X
             </button>
             <div style={{ textAlign: 'center', borderBottom: '1px dashed #666', paddingBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#d4af37', letterSpacing: '1px', marginBottom: '0.5rem' }}>V-ERP PRO</h2>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#d4af37', letterSpacing: '1px', marginBottom: '0.5rem' }}>TIJORATPRO</h2>
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
