@@ -21,7 +21,10 @@ import {
   ToggleRight,
   ChevronRight,
   Eye,
-  EyeOff
+  EyeOff,
+  Globe,
+  Mail,
+  Smartphone
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { API_BASE_URL } from '../api';
@@ -34,29 +37,29 @@ const TABS = [
 ];
 
 const ToggleSwitch = ({ checked, onChange }) => (
-  <div onClick={onChange} style={{ cursor: 'pointer', userSelect: 'none' }}>
+  <div onClick={onChange} style={{ cursor: 'pointer', userSelect: 'none', transition: 'var(--transition)' }}>
     {checked
-      ? <ToggleRight size={36} color="var(--accent-emerald)" />
-      : <ToggleLeft size={36} color="var(--text-muted)" />
+      ? <ToggleRight size={40} color="var(--accent-emerald)" style={{ filter: 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.3))' }} />
+      : <ToggleLeft size={40} color="var(--text-muted)" />
     }
   </div>
 );
 
 const FieldGroup = ({ label, hint, children }) => (
-  <div style={{ marginBottom: '0.25rem' }}>
+  <div style={{ marginBottom: '1.5rem' }}>
     <label style={{
       display: 'block',
       fontSize: '0.75rem',
       fontWeight: '800',
       textTransform: 'uppercase',
-      letterSpacing: '1.5px',
+      letterSpacing: '2px',
       color: 'var(--text-muted)',
       marginBottom: '0.75rem'
     }}>
       {label}
     </label>
     {children}
-    {hint && <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem', lineHeight: '1.5' }}>{hint}</p>}
+    {hint && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.6rem', lineHeight: '1.6', fontWeight: '500' }}>{hint}</p>}
   </div>
 );
 
@@ -126,339 +129,295 @@ const Settings = () => {
   };
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: '1.5rem' }}>
-      <Cpu size={48} className="animate-spin" style={{ color: 'var(--accent-gold)', opacity: 0.5 }} />
-      <span style={{ color: 'var(--text-muted)', fontSize: '1rem', fontWeight: '600' }}>Sozlamalar yuklanmoqda...</span>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: '2rem' }}>
+      <div className="stat-icon-wrapper animate-spin" style={{ width: '80px', height: '80px', border: '2px solid var(--accent-gold-glow)' }}>
+        <Cpu size={40} color="var(--accent-gold)" />
+      </div>
+      <span style={{ color: 'var(--text-muted)', fontSize: '1.2rem', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>Configuring Environment...</span>
     </div>
   );
 
-  const inputStyle = {
-    width: '100%',
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid var(--glass-border)',
-    borderRadius: '14px',
-    padding: '1rem 1.25rem',
-    color: '#fff',
-    fontSize: '1rem',
-    fontWeight: '600',
-    fontFamily: 'inherit',
-    outline: 'none',
-    transition: 'var(--transition)',
-  };
-
   return (
-    <div className="fadeIn" style={{ paddingBottom: '4rem' }}>
-
-      {/* ── Premium Header ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3.5rem' }}>
+    <div className="settings-view fadeIn">
+      {/* Premium Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
             <div className="ai-status-pulse" style={{ background: 'var(--accent-gold)' }}></div>
-            <span style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px' }}>System Configuration</span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px' }}>System Configuration</span>
           </div>
           <h1 className="text-gradient" style={{ fontSize: '3rem', fontWeight: '800', letterSpacing: '-2px', marginBottom: '0.5rem' }}>Tizim Sozlamalari</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>TijoratPro platformasini sozlash, xavfsizlik va tizim boshqaruvi.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Platforma parametrlari, xavfsizlik protokollari va tizim arxitekturasini boshqarish.</p>
         </div>
         <button
           className="btn-premium"
           onClick={handleSave}
           disabled={saving}
-          style={{ padding: '1rem 2.5rem', fontSize: '1rem', minWidth: '180px' }}
+          style={{ height: '60px', padding: '0 3rem', fontSize: '1rem', borderRadius: '18px' }}
         >
           {saved
-            ? <><CheckCircle2 size={20} style={{ marginRight: '0.75rem' }} /> Saqlandi!</>
+            ? <><CheckCircle2 size={22} /> Saqlandi!</>
             : saving
-              ? <><Cpu size={20} className="animate-spin" style={{ marginRight: '0.75rem' }} /> Saqlanmoqda...</>
-              : <><Save size={20} style={{ marginRight: '0.75rem' }} /> Saqlash</>
+              ? <><Cpu size={22} className="animate-spin" /> Saqlanmoqda...</>
+              : <><Save size={22} /> O'zgarishlarni Saqlash</>
           }
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2.5rem', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '3.5rem', alignItems: 'start' }}>
 
-        {/* ── Sidebar Navigation ── */}
+        {/* Sidebar Tabs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'sticky', top: '2rem' }}>
           {TABS.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
-              <button
+              <div
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
+                className={`nav-item ${isActive ? 'active' : ''}`}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  padding: '1.1rem 1.5rem',
-                  borderRadius: '18px',
-                  border: isActive ? `1px solid ${tab.color}33` : '1px solid var(--glass-border)',
-                  background: isActive ? `${tab.color}15` : 'rgba(255,255,255,0.02)',
-                  color: isActive ? '#fff' : 'var(--text-secondary)',
-                  fontWeight: '700',
-                  fontSize: '0.95rem',
-                  cursor: 'pointer',
-                  transition: 'var(--transition)',
-                  width: '100%',
-                  textAlign: 'left',
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: isActive ? `0 4px 20px ${tab.color}22` : 'none'
+                  padding: '1.25rem 1.75rem',
+                  borderRadius: '20px',
+                  background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  border: isActive ? '1px solid var(--glass-border-bright)' : '1px solid transparent',
+                  color: isActive ? '#fff' : 'var(--text-muted)',
                 }}
               >
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
-                  background: isActive ? `${tab.color}25` : 'rgba(255,255,255,0.04)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <Icon size={18} color={isActive ? tab.color : 'var(--text-muted)'} />
-                </div>
-                {tab.label}
-                {isActive && <ChevronRight size={16} color={tab.color} style={{ marginLeft: 'auto' }} />}
-              </button>
+                <Icon size={22} color={isActive ? tab.color : 'inherit'} />
+                <span style={{ flex: 1 }}>{tab.label}</span>
+                {isActive && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: tab.color }}></div>}
+              </div>
             );
           })}
 
-          {/* System Status Card */}
-          <div className="glass-card" style={{ marginTop: '1rem', padding: '1.5rem' }}>
-            <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '1.25rem' }}>Tizim Holati</div>
+          <div className="glass-card" style={{ marginTop: '2rem', padding: '2rem', background: 'rgba(5, 10, 15, 0.4)', borderRadius: '25px' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1.75rem' }}>Cluster Status</div>
             {[
-              { icon: Server, label: 'Backend API', status: 'Online', color: 'var(--accent-emerald)' },
-              { icon: HardDrive, label: 'Ma\'lumotlar Bazasi', status: 'Faol', color: 'var(--accent-emerald)' },
-              { icon: Activity, label: 'Analytics Engine', status: 'Spark', color: 'var(--accent-gold)' },
-            ].map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: i < 2 ? '1rem' : 0 }}>
-                  <Icon size={16} color={item.color} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: '700', color: '#fff' }}>{item.label}</div>
-                  </div>
-                  <div style={{ fontSize: '0.7rem', fontWeight: '800', color: item.color, background: `${item.color}15`, padding: '2px 8px', borderRadius: '6px' }}>{item.status}</div>
+              { icon: Server, label: 'Cloud Gateway', status: 'Online', color: 'var(--accent-emerald)' },
+              { icon: HardDrive, label: 'PostgreSQL DB', status: 'Active', color: 'var(--accent-emerald)' },
+              { icon: Activity, label: 'ML Analytics', status: 'Spark 3.5', color: 'var(--accent-gold)' },
+            ].map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: i < 2 ? '1.25rem' : 0 }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <item.icon size={16} color={item.color} />
                 </div>
-              );
-            })}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#fff' }}>{item.label}</div>
+                  <div style={{ fontSize: '0.7rem', fontWeight: '700', color: item.color }}>{item.status}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* ── Main Content Panel ── */}
-        <div>
-          {/* ── GENERAL TAB ── */}
+        {/* Content Panel */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          
           {activeTab === 'general' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div className="glass-card" style={{ padding: '2.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-                  <div style={{ width: '44px', height: '44px', background: 'var(--accent-gold-soft)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Store size={22} color="var(--accent-gold)" />
-                  </div>
-                  <div>
-                    <h2 style={{ fontSize: '1.3rem', fontWeight: '800' }}>Do'kon Ma'lumotlari</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Biznesingiz haqidagi asosiy ma'lumotlar</p>
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.75rem' }}>
-                  <div style={{ gridColumn: '1 / -1' }}>
-                    <FieldGroup label="Do'kon Nomi" hint="Bu nom chek va hisobotlarda ko'rinadi.">
-                      <input type="text" style={inputStyle} value={settings.store_name || ''} onChange={e => setSettings({ ...settings, store_name: e.target.value })} placeholder="Masalan: TijoratPro Savdo Markazi" />
-                    </FieldGroup>
-                  </div>
-                  <div>
-                    <FieldGroup label="Valyuta">
-                      <select style={inputStyle} value={settings.currency || 'UZS'} onChange={e => setSettings({ ...settings, currency: e.target.value })}>
-                        <option value="UZS">O'zbek so'mi (UZS)</option>
-                        <option value="USD">AQSH Dollari (USD)</option>
-                      </select>
-                    </FieldGroup>
-                  </div>
-                  <div style={{ gridColumn: '1 / -1' }}>
-                    <FieldGroup label="Do'kon Manzili">
-                      <textarea style={{ ...inputStyle, minHeight: '110px', resize: 'vertical' }} value={settings.address || ''} onChange={e => setSettings({ ...settings, address: e.target.value })} placeholder="Toshkent sh., Chilonzor tumani..." />
-                    </FieldGroup>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── SECURITY TAB ── */}
-          {activeTab === 'security' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div className="glass-card" style={{ padding: '2.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-                  <div style={{ width: '44px', height: '44px', background: 'rgba(139,92,246,0.1)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <User size={22} color="var(--accent-purple)" />
-                  </div>
-                  <div>
-                    <h2 style={{ fontSize: '1.3rem', fontWeight: '800' }}>Admin Profili</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Tizim administratori ma'lumotlari</p>
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.75rem' }}>
-                  <div>
-                    <FieldGroup label="Admin Ismi">
-                      <input type="text" style={inputStyle} value={settings.admin_name || ''} onChange={e => setSettings({ ...settings, admin_name: e.target.value })} />
-                    </FieldGroup>
-                  </div>
-                  <div>
-                    <FieldGroup label="Admin Email">
-                      <input type="email" style={inputStyle} value={settings.admin_email || ''} onChange={e => setSettings({ ...settings, admin_email: e.target.value })} />
-                    </FieldGroup>
-                  </div>
-                </div>
-              </div>
-
-              <div className="glass-card" style={{ padding: '2.5rem', border: '1px solid rgba(212,175,55,0.2)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-                  <div style={{ width: '44px', height: '44px', background: 'var(--accent-gold-soft)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <KeyRound size={22} color="var(--accent-gold)" />
-                  </div>
-                  <div>
-                    <h2 style={{ fontSize: '1.3rem', fontWeight: '800' }}>PIN Kodlar</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Kirish va kassir nazorat kodlari</p>
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.75rem' }}>
-                  <div>
-                    <FieldGroup label="Admin PIN Kodi" hint="Lock ekrani va bosh admin uchun. Minimal 4 raqam.">
-                      <div style={{ position: 'relative' }}>
-                        <Lock size={18} style={{ position: 'absolute', left: '1.1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-gold)', zIndex: 1 }} />
-                        <input
-                          type={showAdminPin ? 'text' : 'password'}
-                          style={{ ...inputStyle, paddingLeft: '3rem', paddingRight: '3rem', border: '1px solid var(--accent-gold-glow)', letterSpacing: showAdminPin ? '2px' : '4px', fontSize: '1.2rem' }}
-                          value={settings.lock_pin || ''}
-                          onChange={e => setSettings({ ...settings, lock_pin: e.target.value })}
-                          placeholder="••••"
-                          maxLength={12}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowAdminPin(v => !v)}
-                          style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.25rem', display: 'flex', alignItems: 'center' }}
-                        >
-                          {showAdminPin ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                    </FieldGroup>
-                  </div>
-                  <div>
-                    <FieldGroup label="Kassir PIN Kodi" hint="Faqat kassa moduliga kirish uchun ishlatiladi.">
-                      <div style={{ position: 'relative' }}>
-                        <Lock size={18} style={{ position: 'absolute', left: '1.1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-emerald)', zIndex: 1 }} />
-                        <input
-                          type={showCashierPin ? 'text' : 'password'}
-                          style={{ ...inputStyle, paddingLeft: '3rem', paddingRight: '3rem', border: '1px solid rgba(16,185,129,0.3)', letterSpacing: showCashierPin ? '2px' : '4px', fontSize: '1.2rem' }}
-                          value={settings.cashier_pin || ''}
-                          onChange={e => setSettings({ ...settings, cashier_pin: e.target.value })}
-                          placeholder="••••"
-                          maxLength={12}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowCashierPin(v => !v)}
-                          style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.25rem', display: 'flex', alignItems: 'center' }}
-                        >
-                          {showCashierPin ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                    </FieldGroup>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── NOTIFICATIONS TAB ── */}
-          {activeTab === 'notifications' && (
-            <div className="glass-card" style={{ padding: '2.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-                <div style={{ width: '44px', height: '44px', background: 'rgba(59,130,246,0.1)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Bell size={22} color="var(--accent-blue)" />
+            <div className="glass-card animate-float" style={{ padding: '3.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3.5rem' }}>
+                <div className="stat-icon-wrapper" style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'var(--accent-gold-soft)', border: '1px solid var(--accent-gold-glow)' }}>
+                  <Store size={28} color="var(--accent-gold)" />
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '1.3rem', fontWeight: '800' }}>Bildirishnoma Sozlamalari</h2>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Qanday hodisalar haqida xabar olishni tanlang</p>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff', letterSpacing: '-0.5px' }}>Do'kon Konfiguratsiyasi</h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Biznesingizning global identifikatsiya ma'lumotlari.</p>
                 </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <FieldGroup label="Do'kon Nomi" hint="Cheklar, hisobotlar va tizim sarlavhasida ko'rsatiladigan asosiy brend nomi.">
+                    <div style={{ position: 'relative' }}>
+                      <Globe size={20} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-gold)' }} />
+                      <input type="text" className="premium-input" style={{ height: '65px', paddingLeft: '4rem' }} value={settings.store_name || ''} onChange={e => setSettings({ ...settings, store_name: e.target.value })} placeholder="Masalan: TijoratPro Savdo Markazi" />
+                    </div>
+                  </FieldGroup>
+                </div>
+                <div>
+                  <FieldGroup label="Baza Valyutasi">
+                    <select className="premium-input" style={{ height: '65px' }} value={settings.currency || 'UZS'} onChange={e => setSettings({ ...settings, currency: e.target.value })}>
+                      <option value="UZS">O'zbek so'mi (UZS)</option>
+                      <option value="USD">AQSH Dollari (USD)</option>
+                    </select>
+                  </FieldGroup>
+                </div>
+                <div>
+                  <FieldGroup label="Hudud & Vaqt" hint="Tizim vaqti: GMT+5 (Tashkent)">
+                    <input type="text" className="premium-input" style={{ height: '65px' }} value="Uzbekistan / Tashkent" disabled />
+                  </FieldGroup>
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <FieldGroup label="Do'kon Manzili">
+                    <textarea className="premium-input" style={{ minHeight: '140px', padding: '1.5rem', lineHeight: '1.6' }} value={settings.address || ''} onChange={e => setSettings({ ...settings, address: e.target.value })} placeholder="Toshkent sh., Chilonzor tumani, Bunyodkor ko'chasi 15-uy..." />
+                  </FieldGroup>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'security' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+              <div className="glass-card" style={{ padding: '3.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3.5rem' }}>
+                  <div className="stat-icon-wrapper" style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                    <Shield size={28} color="var(--accent-purple)" />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff' }}>Administrator Nazorati</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Tizimga kirish huquqlari va admin ma'lumotlari.</p>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem' }}>
+                  <FieldGroup label="Admin Ismi">
+                    <div style={{ position: 'relative' }}>
+                      <User size={20} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-purple)' }} />
+                      <input type="text" className="premium-input" style={{ height: '65px', paddingLeft: '4rem' }} value={settings.admin_name || ''} onChange={e => setSettings({ ...settings, admin_name: e.target.value })} />
+                    </div>
+                  </FieldGroup>
+                  <FieldGroup label="Email Manzili">
+                    <div style={{ position: 'relative' }}>
+                      <Mail size={20} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-purple)' }} />
+                      <input type="email" className="premium-input" style={{ height: '65px', paddingLeft: '4rem' }} value={settings.admin_email || ''} onChange={e => setSettings({ ...settings, admin_email: e.target.value })} />
+                    </div>
+                  </FieldGroup>
+                </div>
+              </div>
+
+              <div className="glass-card" style={{ padding: '3.5rem', border: '1px solid var(--accent-gold-glow)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3.5rem' }}>
+                  <div className="stat-icon-wrapper" style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'var(--accent-gold-soft)', border: '1px solid var(--accent-gold-glow)' }}>
+                    <KeyRound size={28} color="var(--accent-gold)" />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff' }}>PIN Kodlar Xavfsizligi</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Tizim blokirovkasini ochish va rol nazorati kodlari.</p>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem' }}>
+                  <FieldGroup label="Admin PIN Kodi" hint="Barcha modullarga to'liq kirish huquqini beradi.">
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={20} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-gold)' }} />
+                      <input
+                        type={showAdminPin ? 'text' : 'password'}
+                        className="premium-input"
+                        style={{ height: '70px', paddingLeft: '4.5rem', paddingRight: '4.5rem', fontSize: '1.5rem', letterSpacing: showAdminPin ? '2px' : '8px', color: 'var(--accent-gold)' }}
+                        value={settings.lock_pin || ''}
+                        onChange={e => setSettings({ ...settings, lock_pin: e.target.value })}
+                        placeholder="••••"
+                      />
+                      <button type="button" onClick={() => setShowAdminPin(!showAdminPin)} style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                        {showAdminPin ? <EyeOff size={22} /> : <Eye size={22} />}
+                      </button>
+                    </div>
+                  </FieldGroup>
+                  <FieldGroup label="Kassir PIN Kodi" hint="Faqat POS (Kassa) moduliga kirish huquqini beradi.">
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={20} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-emerald)' }} />
+                      <input
+                        type={showCashierPin ? 'text' : 'password'}
+                        className="premium-input"
+                        style={{ height: '70px', paddingLeft: '4.5rem', paddingRight: '4.5rem', fontSize: '1.5rem', letterSpacing: showCashierPin ? '2px' : '8px', color: 'var(--accent-emerald)' }}
+                        value={settings.cashier_pin || ''}
+                        onChange={e => setSettings({ ...settings, cashier_pin: e.target.value })}
+                        placeholder="••••"
+                      />
+                      <button type="button" onClick={() => setShowCashierPin(!showCashierPin)} style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                        {showCashierPin ? <EyeOff size={22} /> : <Eye size={22} />}
+                      </button>
+                    </div>
+                  </FieldGroup>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'notifications' && (
+            <div className="glass-card" style={{ padding: '3.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3.5rem' }}>
+                <div className="stat-icon-wrapper" style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                  <Bell size={28} color="var(--accent-blue)" />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff' }}>Avtomat Bildirishnomalar</h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Tizim hodisalari haqida masofaviy ogohlantirishlar.</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {[
-                  { key: 'email_alerts', label: 'Email Hisobotlari', desc: "Har kuni soat 09:00 da kunlik savdo hisoboti email'ga yuboriladi.", color: 'var(--accent-blue)' },
-                  { key: 'sms_alerts', label: 'SMS Ogohlantirishlari', desc: "Omborda mahsulot tugay qolganida mobil telefonga SMS xabar yuboriladi.", color: 'var(--accent-emerald)' },
+                  { key: 'email_alerts', icon: Mail, label: 'Email Monitoring', desc: "Kunlik savdo ko'rsatkichlari va tahliliy hisobotlarni email orqali yuborish.", color: 'var(--accent-blue)' },
+                  { key: 'sms_alerts', icon: Smartphone, label: 'SMS Gateway', desc: "Kritik holatlar (mahsulot tugashi, katta qaytarimlar) haqida SMS ogohlantirish.", color: 'var(--accent-emerald)' },
                 ].map(item => (
                   <div
                     key={item.key}
+                    className="glass-card"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      gap: '1.5rem',
-                      padding: '1.5rem 1.75rem',
-                      borderRadius: '18px',
-                      background: 'rgba(255,255,255,0.02)',
-                      border: '1px solid var(--glass-border)',
-                      transition: 'var(--transition)',
+                      padding: '2rem 2.5rem',
+                      background: 'rgba(255,255,255,0.01)',
                       cursor: 'pointer'
                     }}
                     onClick={() => setSettings(s => ({ ...s, [item.key]: !s[item.key] }))}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                      <CircleDot size={20} color={item.color} style={{ marginTop: '2px', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                      <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <item.icon size={20} color={item.color} />
+                      </div>
                       <div>
-                        <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.25rem' }}>{item.label}</div>
-                        <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.5' }}>{item.desc}</div>
+                        <div style={{ fontWeight: '800', fontSize: '1.1rem', color: '#fff', marginBottom: '0.25rem' }}>{item.label}</div>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500' }}>{item.desc}</div>
                       </div>
                     </div>
-                    <ToggleSwitch checked={settings[item.key]} onChange={() => setSettings(s => ({ ...s, [item.key]: !s[item.key] }))} />
+                    <ToggleSwitch checked={settings[item.key]} />
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ── SYSTEM TAB ── */}
           {activeTab === 'system' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div className="glass-card" style={{ padding: '2.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                  <div style={{ width: '44px', height: '44px', background: 'rgba(16,185,129,0.1)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Activity size={22} color="var(--accent-emerald)" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+              <div className="glass-card" style={{ padding: '3.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3.5rem' }}>
+                  <div className="stat-icon-wrapper" style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                    <Activity size={28} color="var(--accent-emerald)" />
                   </div>
                   <div>
-                    <h2 style={{ fontSize: '1.3rem', fontWeight: '800' }}>Tizim Ma'lumotlari</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Joriy platforma versiyasi va texnik ma'lumotlar</p>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff' }}>Cluster Arxitekturasi</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Tizimning texnik komponentlari va versiyalari.</p>
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
                   {[
-                    { label: 'Platforma', value: 'TijoratPro v2.0' },
-                    { label: 'Frontend', value: 'React 18 + Vite' },
-                    { label: 'Backend', value: 'FastAPI + Pandas' },
-                    { label: 'Analytics', value: 'Apache Spark' },
+                    { label: 'Platform Engine', value: 'TijoratPro Enterprise v3.0' },
+                    { label: 'Runtime Environment', value: 'React 18 + Node.js 20' },
+                    { label: 'Big Data Pipeline', value: 'Apache Spark + Hadoop 3.3' },
+                    { label: 'Database Engine', value: 'In-Memory Pandas + Railway DB' },
                   ].map((item, i) => (
-                    <div key={i} style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '14px', border: '1px solid var(--glass-border)' }}>
-                      <div style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>{item.label}</div>
-                      <div style={{ fontWeight: '800', color: '#fff', fontSize: '1rem' }}>{item.value}</div>
+                    <div key={i} className="glass-card" style={{ padding: '1.5rem 2rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--glass-border)' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>{item.label}</div>
+                      <div style={{ fontWeight: '800', color: '#fff', fontSize: '1.05rem' }}>{item.value}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="glass-card" style={{ padding: '2.5rem', border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.03)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                  <div style={{ width: '44px', height: '44px', background: 'rgba(239,68,68,0.1)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <AlertTriangle size={22} color="#ef4444" />
+              <div className="glass-card" style={{ padding: '3.5rem', border: '1px solid rgba(239, 68, 68, 0.2)', background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, transparent 100%)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3rem' }}>
+                  <div className="stat-icon-wrapper" style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                    <AlertTriangle size={28} color="#ef4444" />
                   </div>
                   <div>
-                    <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#ef4444' }}>Xavfli Hudud</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Bu amalni ortga qaytarib bo'lmaydi. Ehtiyot bo'ling!</p>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#ef4444' }}>Danger Zone</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Ushbu amallar tizim ma'lumotlarini butunlay o'chirib yuboradi.</p>
                   </div>
                 </div>
-                <div style={{ padding: '1.5rem', background: 'rgba(239,68,68,0.05)', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.15)', marginBottom: '2rem' }}>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.7' }}>
-                    Barcha <strong style={{ color: '#fff' }}>mahsulotlar</strong>, <strong style={{ color: '#fff' }}>sotuvlar tarixi</strong>, <strong style={{ color: '#fff' }}>mijozlar</strong> va <strong style={{ color: '#fff' }}>tahlillar</strong> butunlay o'chirib tashlanadi.
-                    Bu amal qaytarilmas.
+                <div style={{ padding: '2rem', background: 'rgba(239, 68, 68, 0.03)', borderRadius: '20px', border: '1px solid rgba(239, 68, 68, 0.1)', marginBottom: '2.5rem' }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.7', fontWeight: '500' }}>
+                    Ma'lumotlar bazasini tozalash natijasida barcha <strong style={{ color: '#fff' }}>mahsulotlar</strong>, <strong style={{ color: '#fff' }}>sotuvlar</strong> va <strong style={{ color: '#fff' }}>mijozlar</strong> bazasi butunlay o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi.
                   </p>
                 </div>
                 <button
@@ -467,25 +426,24 @@ const Settings = () => {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '1rem 2rem',
-                    background: 'rgba(239,68,68,0.1)',
-                    border: '1px solid rgba(239,68,68,0.4)',
-                    borderRadius: '14px',
+                    gap: '1rem',
+                    padding: '1.25rem 2.5rem',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    borderRadius: '16px',
                     color: '#ef4444',
-                    fontWeight: '800',
-                    fontSize: '0.9rem',
+                    fontWeight: '900',
+                    fontSize: '1rem',
                     cursor: 'pointer',
                     transition: 'var(--transition)',
-                    fontFamily: 'inherit',
                     textTransform: 'uppercase',
                     letterSpacing: '1px',
                   }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.2)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
                 >
-                  <Trash2 size={20} />
-                  Ma'lumotlar Bazasini Tozalash
+                  <Trash2 size={22} />
+                  System Factory Reset
                 </button>
               </div>
             </div>

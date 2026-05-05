@@ -4,7 +4,7 @@ import StatsGrid from '../components/StatsGrid';
 import Charts from '../components/Charts';
 import DataTable from '../components/DataTable';
 import { useStore } from '../context/StoreContext';
-import { TrendingUp, Package, ShoppingCart, ArrowUpRight, ArrowDownRight, RefreshCcw, BrainCircuit, DollarSign, CalendarDays, CalendarRange, Calendar } from 'lucide-react';
+import { TrendingUp, Package, ShoppingCart, ArrowUpRight, ArrowDownRight, RefreshCcw, BrainCircuit, DollarSign, CalendarDays, CalendarRange, Calendar, Lock } from 'lucide-react';
 
 const Dashboard = () => {
   const { 
@@ -242,6 +242,23 @@ const Dashboard = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button 
+            className="btn-premium btn-ghost" 
+            style={{ 
+              height: '55px', 
+              padding: '0 1.5rem', 
+              borderColor: 'rgba(139, 92, 246, 0.3)',
+              color: 'var(--accent-purple)',
+              gap: '0.5rem'
+            }}
+            onClick={() => {
+              if (window.lockScreen) window.lockScreen();
+            }}
+          >
+            <Lock size={18} />
+            Qulflash
+          </button>
+
           <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '6px', borderRadius: '14px', border: '1px solid var(--glass-border)' }}>
             {[
               { id: 'day', label: 'Kun' },

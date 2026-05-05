@@ -74,18 +74,20 @@ export const StoreProvider = ({ children }) => {
   };
 
   const addToCart = (product) => {
-    if (product.stock <= 0) {
+    const stock = Number(product.stock || 0);
+    if (stock <= 0) {
       addNotification(`Bu tovar qolmagan!`, "error");
       return;
     }
     setCart(prev => {
       const exists = prev.find(item => item.id === product.id);
       if (exists) {
-        if (exists.quantity + 1 > product.stock) {
+        const nextQty = Number(exists.quantity) + 1;
+        if (nextQty > stock) {
           addNotification(`Omborda yetarli qoldiq yo'q!`, "error");
           return prev;
         }
-        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        return prev.map(item => item.id === product.id ? { ...item, quantity: nextQty } : item);
       }
       return [...prev, { ...product, quantity: 1 }];
     });
@@ -98,18 +100,20 @@ export const StoreProvider = ({ children }) => {
   const clearCart = () => setCart([]);
 
   const updateCartQuantity = (id, quantity) => {
+    const newQty = parseFloat(quantity) || 0;
     setCart(prev => {
       return prev.map(item => {
         if (item.id === id) {
-          const newQty = Math.max(0.01, parseFloat(quantity) || 0.01);
-          if (newQty > item.stock) {
-            addNotification(`Omborda faqat ${item.stock} ${item.unit || 'ta'} qolgan!`, "error");
-            return { ...item, quantity: item.stock };
+          const stock = Number(item.stock || 0);
+          if (newQty > stock) {
+            addNotification(`Omborda faqat ${stock} ${item.unit || 'ta'} qolgan!`, "error");
+            return { ...item, quantity: stock };
           }
+          if (newQty <= 0) return null; // We will filter these out
           return { ...item, quantity: newQty };
         }
         return item;
-      });
+      }).filter(Boolean);
     });
   };
 

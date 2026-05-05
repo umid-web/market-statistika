@@ -1,118 +1,120 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
 import { 
   Search, 
   Trash2, 
   CreditCard, 
   Banknote, 
-  Users, 
   ShoppingBag, 
   X,
-  PlusCircle,
+  Plus,
+  Minus,
   QrCode,
   ArrowRight,
   Printer,
-  Download
+  TrendingUp,
+  Package,
+  CheckCircle2,
+  Lock,
+  Calculator,
+  Scan,
+  LayoutGrid,
+  Delete,
+  Zap,
+  ArrowLeft,
+  ChevronRight,
+  RefreshCcw
 } from 'lucide-react';
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
-
 import { API_BASE_URL } from '../api';
 
 const POS = () => {
-  const { products, cart, addToCart, removeFromCart, clearCart, updateCartQuantity, addNotification, fetchProducts, fetchAnalytics, fetchSalesHistory } = useStore();
+  const { 
+    products, cart, addToCart, removeFromCart, clearCart, 
+    updateCartQuantity, addNotification, fetchProducts, 
+    fetchAnalytics, fetchSalesHistory 
+  } = useStore();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentType, setPaymentType] = useState('cash');
-  const [customers, setCustomers] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState('MEHMON');
+  const [selectedCategory, setSelectedCategory] = useState('Barchasi');
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
-  const [dailyStats, setDailyStats] = useState({ revenue: 0, orders: 0, items: 0 });
+  const [dailyStats, setDailyStats] = useState({ revenue: 0, orders: 0 });
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [receivedCash, setReceivedCash] = useState('');
+  
+  const searchInputRef = useRef(null);
 
   const fetchDailyStats = async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/sales-history`);
       const now = new Date();
-      const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-      const todaySales = res.data.filter(s => s.order_date?.startsWith(today));
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+      
+      const todaySales = res.data.filter(s => s.order_date?.startsWith(todayStr));
       const revenue = todaySales.reduce((acc, s) => acc + (Number(s.sell_price) * Number(s.quantity)), 0);
       const orders = new Set(todaySales.map(s => s.order_id)).size;
-      const items = todaySales.reduce((acc, s) => acc + Number(s.quantity), 0);
-      setDailyStats({ revenue, orders, items });
+      setDailyStats({ revenue, orders });
     } catch (err) {}
   };
 
-  // Filter products by name, category, SKU or barcode
-  const filteredProducts = products.filter(p =>
-    (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.category || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.sku || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.barcode || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/api/customers`);
-        setCustomers(res.data);
-      } catch (err) {}
+    const init = async () => {
+      fetchDailyStats();
+      fetchProducts();
     };
-    fetchCustomers();
-    fetchDailyStats();
+    init();
+    searchInputRef.current?.focus();
   }, []);
 
-  // Global Keyboard Shortcuts
+  // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'F1') {
-        e.preventDefault();
-        handleCheckout();
-      } else if (e.key === 'F2') {
-        e.preventDefault();
-        clearCart();
-      } else if (e.key === 'F3') {
-        e.preventDefault();
-        document.getElementById('pos-search')?.focus();
-      }
+      if (e.key === 'F1') { e.preventDefault(); handleCheckout(); }
+      if (e.key === 'F2') { e.preventDefault(); clearCart(); }
+      if (e.key === 'F3') { e.preventDefault(); searchInputRef.current?.focus(); }
+      if (e.key === 'F4') { e.preventDefault(); setPaymentType(prev => prev === 'cash' ? 'card' : 'cash'); }
+      if (e.key === 'Escape') { setShowReceipt(false); }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [cart, paymentType]);
+
+  const categories = useMemo(() => {
+    const cats = ['Barchasi', ...new Set(products.map(p => p.category).filter(Boolean))];
+    return cats;
+  }, [products]);
+
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (p.sku || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (p.barcode || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCat = selectedCategory === 'Barchasi' || p.category === selectedCategory;
+    return matchesSearch && matchesCat;
   });
 
-  const playBeep = () => {
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, ctx.currentTime);
-      gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
-      osc.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      osc.start();
-      setTimeout(() => osc.stop(), 150);
-    } catch(e) {}
-  };
-
-  
-
-  const subTotal = cart.reduce((acc, item) => acc + (item.sell_price * item.quantity), 0);
-  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const subTotal = cart.reduce((acc, item) => acc + (Number(item.sell_price) * Number(item.quantity)), 0);
+  const totalItems = cart.reduce((acc, item) => acc + Number(item.quantity), 0);
+  const change = receivedCash ? (Number(receivedCash) - subTotal) : 0;
 
   const handleCheckout = async () => {
-    if (cart.length === 0) return;
+    if (cart.length === 0 || checkoutLoading) return;
+    setCheckoutLoading(true);
     try {
       const payload = {
         items: cart.map(item => ({
           product_id: item.id,
           product_name: item.name,
-          sku: item.sku,
           category: item.category,
           buy_price: item.buy_price,
           sell_price: item.sell_price,
           quantity: item.quantity,
-          customer_id: selectedCustomer,
+          customer_id: 'MEHMON',
           warehouse: item.warehouse || 'Asosiy Ombor'
         }))
       };
@@ -123,266 +125,700 @@ const POS = () => {
         order_id: res.data.order_id,
         items: [...cart],
         total: subTotal,
-        customer: selectedCustomer,
-        date: new Date().toLocaleDateString('uz-UZ', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+        payment: paymentType,
+        received: receivedCash || subTotal,
+        change: change > 0 ? change : 0,
+        date: new Date().toLocaleString()
       });
       setShowReceipt(true);
       
-      addNotification("Sotuv muvaffaqiyatli!", "success");
-      playBeep();
+      addNotification("Sotuv muvaffaqiyatli yakunlandi", "success");
       clearCart();
-      
-      // Barcha ma'lumotlarni darhol yangilaymiz
+      setReceivedCash('');
       fetchProducts();
       fetchDailyStats();
-      fetchSalesHistory();
-      fetchAnalytics();
     } catch (err) {
-      addNotification("Xatolik yuz berdi!", "error");
+      addNotification("Checkout xatosi: " + (err.response?.data?.detail || "Server xatosi"), "error");
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
-  return (
-    <div className="pos-grid fadeIn" style={{ position: 'relative' }}>
-      
-      {showReceipt && receiptData && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(20px)' }}>
-          <div className="glass-card animate-float" style={{ width: '450px', padding: '3rem', display: 'flex', flexDirection: 'column', gap: '2rem', border: '1px solid var(--accent-gold-glow)' }}>
-            <div style={{ textAlign: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '2rem' }}>
-              <h2 className="text-gold" style={{ fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-2px', marginBottom: '0.5rem' }}>TIJORATPRO</h2>
-              <div style={{ background: 'var(--accent-gold-soft)', color: 'var(--accent-gold)', padding: '4px 12px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: '800', width: 'fit-content', margin: '0 auto', textTransform: 'uppercase', letterSpacing: '1px' }}>Official Receipt</div>
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Sana</div>
-                <div style={{ fontWeight: '700' }}>{receiptData.date}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Chek ID</div>
-                <div style={{ fontWeight: '700', color: 'var(--accent-purple)' }}>#{receiptData.order_id}</div>
-              </div>
-            </div>
+  const quickCashAmounts = [1000, 5000, 10000, 50000, 100000, 200000];
 
-            <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '16px', padding: '1.5rem', border: '1px solid var(--glass-border)' }}>
-              {receiptData.items.map((item, idx) => (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: '700', color: '#fff' }}>{item.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.quantity} {item.unit || 'ta'} x {item.sell_price.toLocaleString()}</div>
+  const generatePDF = (data) => {
+    const doc = new jsPDF({ format: [80, 150] });
+    doc.setFontSize(14);
+    doc.text("TIJORATPRO ERP", 40, 10, { align: 'center' });
+    doc.setFontSize(8);
+    doc.text(`Sana: ${data.date}`, 5, 20);
+    doc.text(`ID: ${data.order_id}`, 5, 24);
+    doc.text("-".repeat(40), 5, 28);
+    let y = 32;
+    data.items.forEach(it => {
+      doc.text(`${it.name}`, 5, y);
+      doc.text(`${it.quantity} x ${it.sell_price.toLocaleString()} = ${(it.quantity*it.sell_price).toLocaleString()}`, 5, y+4);
+      y += 10;
+    });
+    doc.text("-".repeat(40), 5, y);
+    doc.setFontSize(10);
+    doc.text(`JAMI: ${data.total.toLocaleString()} UZS`, 5, y+8);
+    doc.text(`TO'LANDI: ${Number(data.received).toLocaleString()} UZS`, 5, y+13);
+    doc.text(`QAYTIM: ${Number(data.change).toLocaleString()} UZS`, 5, y+18);
+    doc.save(`receipt_${data.order_id}.pdf`);
+  };
+
+  return (
+    <div className="pos-view fadeIn">
+      {/* Receipt Modal */}
+      {showReceipt && receiptData && (
+        <div className="modal-overlay">
+          <div className="receipt-glass-modal animate-float">
+            <div className="receipt-sparkle-bg"></div>
+            <div className="receipt-content">
+              <div className="success-lottie-mock">
+                <CheckCircle2 size={60} color="var(--accent-emerald)" strokeWidth={1.5} />
+              </div>
+              <h2 className="text-gradient" style={{ fontSize: '2.4rem', fontWeight: '900', marginBottom: '0.5rem' }}>Sotuv Yakunlandi</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1rem', letterSpacing: '1px' }}>TRANZAKSIYA #{receiptData.order_id}</p>
+              
+              <div className="receipt-financials">
+                <div className="receipt-main-total">
+                   <span>UMUMIY TO'LOV</span>
+                   <strong>{receiptData.total.toLocaleString()} <small>UZS</small></strong>
+                </div>
+                <div className="receipt-sub-details">
+                  <div className="sub-row">
+                    <span>To'lov Usuli</span>
+                    <span className="pill-gold">{receiptData.payment === 'cash' ? '💵 NAQD' : '💳 KARTA'}</span>
                   </div>
-                  <div style={{ fontWeight: '800', color: 'var(--accent-gold)' }}>
-                    {(item.quantity * item.sell_price).toLocaleString()}
+                  <div className="sub-row">
+                    <span>Qaytim</span>
+                    <span className="text-emerald" style={{ fontWeight: '900', fontSize: '1.2rem' }}>{receiptData.change.toLocaleString()} UZS</span>
                   </div>
                 </div>
-              ))}
-              <div style={{ borderTop: '1px solid var(--glass-border)', marginTop: '1rem', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: '800' }}>JAMI:</span>
-                <span className="text-gradient" style={{ fontSize: '1.75rem', fontWeight: '900' }}>{receiptData.total.toLocaleString()} <small style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>UZS</small></span>
               </div>
-            </div>
 
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <button className="btn-premium btn-ghost" style={{ flex: 1 }} onClick={() => {
-                const doc = new jsPDF({ format: [80, 200] });
-                doc.setFontSize(14);
-                doc.text("TIJORATPRO STORE", 40, 10, { align: 'center' });
-                doc.setFontSize(10);
-                doc.text(`Sana: ${receiptData.date}`, 5, 20);
-                doc.text(`Chek ID: ${receiptData.order_id}`, 5, 25);
-                doc.text("-----------------------------------------", 5, 30);
-                let y = 35;
-                receiptData.items.forEach(item => {
-                  doc.text(`${item.name}`, 5, y);
-                  doc.text(`${item.quantity} x ${item.sell_price.toLocaleString()}`, 5, y+5);
-                  doc.text(`${(item.quantity * item.sell_price).toLocaleString()}`, 75, y+5, { align: 'right' });
-                  y += 10;
-                });
-                doc.text("-----------------------------------------", 5, y);
-                doc.setFontSize(12);
-                doc.text(`JAMI: ${receiptData.total.toLocaleString()} so'm`, 5, y+10);
-                doc.save(`chek_${receiptData.order_id}.pdf`);
-              }}>
-                <Download size={18} /> PDF
-              </button>
-              <button className="btn-premium" style={{ flex: 1.5 }} onClick={() => { setShowReceipt(false); setReceiptData(null); }}>
-                Yangi Sotuv
-              </button>
+              <div className="receipt-actions-v2">
+                <button className="btn-premium" style={{ height: '60px' }} onClick={() => generatePDF(receiptData)}>
+                  <Printer size={20} /> CHEKNI CHOP ETISH
+                </button>
+                <button className="btn-premium btn-ghost" style={{ height: '60px' }} onClick={() => setShowReceipt(false)}>
+                  <ArrowLeft size={20} /> YANGI SOTUV (ESC)
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-        {/* Professional Summary Header */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '2rem',
-          padding: '2rem',
-          background: 'linear-gradient(135deg, rgba(226, 183, 74, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%)',
-          borderRadius: '24px',
-          border: '1px solid var(--glass-border)'
-        }}>
-          <div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Bugungi Tushum</div>
-            <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--accent-emerald)', letterSpacing: '-1px' }}>
-              {Math.round(dailyStats.revenue).toLocaleString()} <small style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>UZS</small>
+      <div className="pos-main-container">
+        {/* Compact Header */}
+        <div className="pos-header-v3">
+          <div className="header-left">
+            <div className="pos-search-box-v3">
+              <Search className="search-icon-pos" size={20} />
+              <input 
+                ref={searchInputRef}
+                type="text" 
+                placeholder="Mahsulot yoki barcode... (F3)" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <div className="kbd-hint">F3</div>
             </div>
           </div>
-          <div style={{ borderLeft: '1px solid var(--glass-border)', paddingLeft: '2rem' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Tranzaksiyalar</div>
-            <div style={{ fontSize: '2rem', fontWeight: '800', color: '#fff', letterSpacing: '-1px' }}>
-              {dailyStats.orders} <small style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ta</small>
+
+          <div className="header-right">
+            <div className="pos-stats-v3">
+               <div className="pos-stat-item">
+                  <TrendingUp size={16} color="var(--accent-emerald)" />
+                  <span>{dailyStats.revenue.toLocaleString()}</span>
+               </div>
             </div>
-          </div>
-          <div style={{ borderLeft: '1px solid var(--glass-border)', paddingLeft: '2rem' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Sotuv Hajmi</div>
-            <div style={{ fontSize: '2rem', fontWeight: '800', color: '#fff', letterSpacing: '-1px' }}>
-              {dailyStats.items} <small style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>birlik</small>
-            </div>
+            <button className="lock-btn-v3" onClick={() => window.lockScreen && window.lockScreen()}>
+              <Lock size={18} />
+            </button>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-gold)' }} size={22} />
-            <input 
-              id="pos-search"
-              className="premium-input" 
-              placeholder="Mahsulot nomi, SKU yoki Barcode... (F3)" 
-              style={{ paddingLeft: '4rem', fontSize: '1rem', height: '60px', borderRadius: '18px' }} 
-              value={searchTerm} 
-              onChange={(e) => setSearchTerm(e.target.value)} 
-            />
-          </div>
-          <button className="btn-premium btn-ghost" style={{ width: '60px', height: '60px', borderRadius: '18px' }} onClick={() => addNotification("Skaner topilmadi!", "error")}><QrCode size={24} /></button>
-        </div>
-
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', 
-          gap: '2rem', 
-          overflowY: 'auto',
-          paddingRight: '1rem',
-          maxHeight: 'calc(100vh - 450px)'
-        }}>
-          {filteredProducts.map(product => (
-            <div 
-              key={product.id} 
-              className="glass-card" 
-              style={{ 
-                cursor: 'pointer', 
-                padding: '1.5rem', 
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid var(--glass-border)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem'
-              }}
-              onClick={() => addToCart(product)}
+        {/* Categories Pills */}
+        <div className="pos-categories-v3 custom-scrollbar">
+          {categories.map(cat => (
+            <button 
+              key={cat} 
+              className={`cat-pill-v3 ${selectedCategory === cat ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(cat)}
             >
-              <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.category}</div>
-              <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#fff', height: '45px', overflow: 'hidden' }}>{product.name}</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Omborda: {product.stock} {product.unit}</div>
-                  <div style={{ fontWeight: '800', fontSize: '1.25rem', color: 'var(--accent-emerald)' }}>{Math.round(product.sell_price).toLocaleString()}</div>
-                </div>
-                <div className="stat-icon-wrapper" style={{ width: '40px', height: '40px', background: 'var(--accent-gold-soft)', borderRadius: '12px', marginBottom: '0' }}>
-                  <PlusCircle size={20} color="var(--accent-gold)" />
-                </div>
-              </div>
-              {product.stock <= 0 && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', color: '#ef4444', letterSpacing: '2px' }}>OUT OF STOCK</div>
-              )}
-            </div>
+              {cat}
+            </button>
           ))}
+        </div>
+
+        {/* Product Grid - Denser Layout */}
+        <div className="pos-grid-container custom-scrollbar">
+          <div className="pos-grid-v3">
+            {filteredProducts.map(product => (
+              <div 
+                key={product.id} 
+                className={`product-card-v3 ${product.stock <= 0 ? 'disabled' : ''}`}
+                onClick={() => {
+                  if(product.stock > 0) {
+                    addToCart(product);
+                    setSearchTerm('');
+                    searchInputRef.current?.focus();
+                  }
+                }}
+              >
+                <div className="card-badge-v3">
+                  {product.stock} {product.unit}
+                </div>
+                <div className="card-body-v3">
+                  <h4 className="card-title-v3">{product.name}</h4>
+                  <div className="card-footer-v3">
+                    <span className="card-price-v3">{Number(product.sell_price).toLocaleString()}</span>
+                    <div className="card-add-v3"><Plus size={16} /></div>
+                  </div>
+                </div>
+                {product.stock <= 0 && <div className="out-of-stock-v3">TUGAGAN</div>}
+              </div>
+            ))}
+          </div>
+          
+          {filteredProducts.length === 0 && (
+            <div className="pos-empty-v3">
+               <Scan size={60} strokeWidth={1} opacity={0.3} />
+               <p>Mahsulot topilmadi</p>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', padding: '0', background: 'var(--bg-sidebar)' }}>
-        <div style={{ padding: '2rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div className="stat-icon-wrapper" style={{ width: '42px', height: '42px', background: 'var(--accent-gold-soft)', borderRadius: '12px', marginBottom: '0' }}>
-              <ShoppingBag color="var(--accent-gold)" size={20} />
-            </div>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: '800', letterSpacing: '-0.5px' }}>Savat</h3>
-          </div>
-          <button className="btn-premium btn-ghost" style={{ padding: '0.6rem', color: '#ef4444', borderRadius: '12px' }} onClick={clearCart}>
-            <Trash2 size={20} />
-          </button>
+      {/* Side Intelligence Panel - Fixed Width 400px */}
+      <div className="pos-side-panel-v3">
+        <div className="side-header-v3">
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+             <div className="cart-badge-v3">{totalItems}</div>
+             <span style={{ fontWeight: '900', fontSize: '1rem', letterSpacing: '1px' }}>SAVATCHA</span>
+           </div>
+           <button className="side-clear-btn" onClick={clearCart} title="Tozalash (F2)">
+             <Trash2 size={18} />
+           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
+        <div className="side-cart-list custom-scrollbar">
           {cart.map(item => (
-            <div key={item.id} style={{ 
-              display: 'flex', 
-              gap: '1.25rem', 
-              marginBottom: '1.5rem', 
-              paddingBottom: '1.5rem', 
-              borderBottom: '1px solid var(--glass-border)'
-            }}>
+            <div key={item.id} className="cart-item-v3">
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: '700', fontSize: '1rem', color: '#fff', marginBottom: '0.5rem' }}>{item.name}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '4px' }}>
-                    <input 
-                      type="number" 
-                      value={item.quantity} 
-                      onChange={e => updateCartQuantity(item.id, e.target.value)}
-                      style={{ width: '50px', background: 'transparent', border: 'none', color: 'white', textAlign: 'center', fontWeight: '800' }}
-                      min="0.01"
-                    />
-                  </div>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>x {item.sell_price.toLocaleString()}</span>
+                <div className="item-name-v3">{item.name}</div>
+                <div className="item-details-v3">
+                   <div className="qty-picker-v3">
+                     <button onClick={() => updateCartQuantity(item.id, item.quantity - 1)}><Minus size={12} /></button>
+                     <input value={item.quantity} onChange={(e) => updateCartQuantity(item.id, e.target.value)} />
+                     <button onClick={() => updateCartQuantity(item.id, item.quantity + 1)}><Plus size={12} /></button>
+                   </div>
+                   <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>× {item.sell_price.toLocaleString()}</span>
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '800', fontSize: '1.1rem', color: 'var(--accent-gold)' }}>{(item.sell_price * item.quantity).toLocaleString()}</div>
-                <button onClick={() => removeFromCart(item.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', marginTop: '0.5rem', cursor: 'pointer' }}><X size={18} /></button>
-              </div>
+              <div className="item-total-v3">{(item.quantity * item.sell_price).toLocaleString()}</div>
+              <button className="item-remove-v3" onClick={() => removeFromCart(item.id)}><X size={14} /></button>
             </div>
           ))}
           {cart.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '6rem 0' }}>
-              <div style={{ opacity: 0.1, marginBottom: '1.5rem' }}><ShoppingBag size={80} /></div>
-              <div style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Savat bo'sh</div>
+            <div className="empty-cart-v3">
+               <ShoppingBag size={50} strokeWidth={1} opacity={0.2} />
+               <p>Savat bo'sh</p>
             </div>
           )}
         </div>
 
-        <div style={{ padding: '2.5rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid var(--glass-border)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-secondary)' }}>Jami Yakun:</span>
-            <div style={{ textAlign: 'right' }}>
-              <div className="text-gold" style={{ fontSize: '2.25rem', fontWeight: '900' }}>{subTotal.toLocaleString()}</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>O'zbek so'mi</div>
+        <div className="side-footer-v3">
+          {/* Payment Toggle Only - No Customer Select */}
+          <div className="payment-toggle-v3">
+            <button className={paymentType === 'cash' ? 'active' : ''} onClick={() => setPaymentType('cash')}>NAQD (F4)</button>
+            <button className={paymentType === 'card' ? 'active' : ''} onClick={() => setPaymentType('card')}>KARTA (F4)</button>
+          </div>
+
+          {paymentType === 'cash' && (
+            <div className="cash-area-v3">
+              <div className="cash-input-row-v3">
+                 <input 
+                  type="number" 
+                  placeholder="Summani kiriting..." 
+                  value={receivedCash}
+                  onChange={(e) => setReceivedCash(e.target.value)}
+                 />
+                 <Calculator size={18} color="var(--accent-gold)" />
+              </div>
+              <div className="quick-cash-grid-v3">
+                {quickCashAmounts.map(amt => (
+                  <button key={amt} onClick={() => setReceivedCash(prev => String(Number(prev || 0) + amt))}>
+                    +{amt >= 1000 ? (amt/1000 + 'K') : amt}
+                  </button>
+                ))}
+                <button onClick={() => setReceivedCash('')} style={{ color: '#ef4444' }}><Delete size={16} /></button>
+              </div>
+            </div>
+          )}
+
+          <div className="summary-area-v3">
+            <div className="summary-row-v3">
+              <span>Savatda: {totalItems} ta</span>
+              {receivedCash > 0 && <span>Qaytim: <strong style={{color: 'var(--accent-emerald)'}}>{change.toLocaleString()}</strong></span>}
+            </div>
+            <div className="total-display-v3">
+               <div className="total-label-v3">UMUMIY SUMMA</div>
+               <div className="total-value-v3">{subTotal.toLocaleString()} <small>UZS</small></div>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-            <button 
-              className={`btn-premium ${paymentType === 'cash' ? '' : 'btn-ghost'}`} 
-              onClick={() => setPaymentType('cash')}
-              style={{ padding: '1rem' }}
-            >
-              <Banknote size={20} /> Naqd
-            </button>
-            <button 
-              className={`btn-premium ${paymentType === 'card' ? '' : 'btn-ghost'}`} 
-              onClick={() => setPaymentType('card')}
-              style={{ padding: '1rem' }}
-            >
-              <CreditCard size={20} /> Karta
-            </button>
-          </div>
-
-          <button className="btn-premium" style={{ width: '100%', padding: '1.5rem', fontSize: '1.2rem' }} onClick={handleCheckout}>
-            TO'LOVNI TASDIQLASH <ArrowRight size={24} />
+          <button 
+            className="master-checkout-btn-v3" 
+            disabled={cart.length === 0 || checkoutLoading}
+            onClick={handleCheckout}
+          >
+            {checkoutLoading ? (
+              <RefreshCcw size={24} className="animate-spin" />
+            ) : (
+              <>
+                <QrCode size={22} />
+                <span>YAKUNLASH (F1)</span>
+                <ChevronRight size={18} />
+              </>
+            )}
           </button>
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .pos-view {
+          display: grid;
+          grid-template-columns: 1fr 400px;
+          height: calc(100vh - 40px);
+          overflow: hidden;
+          background: #050a0f;
+        }
+
+        .pos-main-container {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1.5rem;
+          overflow: hidden;
+        }
+
+        /* Compact Header V3 */
+        .pos-header-v3 {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .pos-search-box-v3 {
+          position: relative;
+          width: 500px;
+        }
+
+        .search-icon-pos {
+          position: absolute;
+          left: 1.25rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--accent-gold);
+          opacity: 0.6;
+        }
+
+        .pos-search-box-v3 input {
+          width: 100%;
+          height: 50px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid var(--glass-border);
+          border-radius: 14px;
+          padding: 0 3.5rem;
+          color: #fff;
+          font-weight: 600;
+        }
+
+        .pos-stats-v3 {
+          display: flex;
+          gap: 1rem;
+        }
+
+        .pos-stat-item {
+          background: rgba(255,255,255,0.02);
+          padding: 0.5rem 1rem;
+          border-radius: 12px;
+          border: 1px solid var(--glass-border);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-weight: 800;
+          font-size: 0.85rem;
+        }
+
+        .lock-btn-v3 {
+          width: 45px;
+          height: 45px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid var(--glass-border);
+          color: var(--accent-purple);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        }
+
+        /* Category Pills V3 */
+        .pos-categories-v3 {
+          display: flex;
+          gap: 0.5rem;
+          padding-bottom: 0.5rem;
+          overflow-x: auto;
+        }
+
+        .cat-pill-v3 {
+          padding: 0.6rem 1.25rem;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid var(--glass-border);
+          border-radius: 10px;
+          color: var(--text-muted);
+          font-weight: 800;
+          font-size: 0.75rem;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.2s;
+        }
+
+        .cat-pill-v3.active {
+          background: var(--accent-gold);
+          color: #000;
+          border-color: var(--accent-gold);
+        }
+
+        /* Product Grid V3 - Industrial Density */
+        .pos-grid-container {
+          flex: 1;
+          overflow-y: auto;
+          padding-right: 0.5rem;
+        }
+
+        .pos-grid-v3 {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+          gap: 1rem;
+        }
+
+        .product-card-v3 {
+          background: rgba(255,255,255,0.02);
+          border: 1px solid var(--glass-border);
+          border-radius: 16px;
+          padding: 1rem;
+          cursor: pointer;
+          position: relative;
+          transition: all 0.2s;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          height: 140px;
+        }
+
+        .product-card-v3:hover {
+          border-color: var(--accent-gold);
+          background: rgba(255,255,255,0.04);
+          transform: translateY(-3px);
+        }
+
+        .card-badge-v3 {
+          font-size: 0.65rem;
+          font-weight: 900;
+          color: var(--text-muted);
+          background: rgba(255,255,255,0.05);
+          width: fit-content;
+          padding: 2px 6px;
+          border-radius: 6px;
+        }
+
+        .card-title-v3 {
+          font-size: 0.9rem;
+          font-weight: 700;
+          color: #fff;
+          margin: 0.5rem 0;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          line-height: 1.3;
+        }
+
+        .card-footer-v3 {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .card-price-v3 {
+          font-weight: 900;
+          color: var(--accent-emerald);
+          font-size: 1.1rem;
+        }
+
+        .card-add-v3 {
+          width: 28px;
+          height: 28px;
+          background: var(--accent-gold-soft);
+          color: var(--accent-gold);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .out-of-stock-v3 {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.6);
+          color: #ef4444;
+          font-weight: 900;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.75rem;
+          border-radius: 16px;
+        }
+
+        /* Side Panel V3 */
+        .pos-side-panel-v3 {
+          display: flex;
+          flex-direction: column;
+          background: #0a0f14;
+          border-left: 1px solid var(--glass-border);
+        }
+
+        .side-header-v3 {
+          padding: 1.5rem;
+          border-bottom: 1px solid var(--glass-border);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .cart-badge-v3 {
+          background: var(--accent-gold);
+          color: #000;
+          padding: 2px 8px;
+          border-radius: 6px;
+          font-weight: 900;
+          font-size: 0.9rem;
+        }
+
+        .side-clear-btn {
+          background: transparent;
+          border: none;
+          color: var(--text-muted);
+          cursor: pointer;
+        }
+
+        .side-cart-list {
+          flex: 1;
+          padding: 1rem;
+          overflow-y: auto;
+        }
+
+        .cart-item-v3 {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1rem;
+          background: rgba(255,255,255,0.02);
+          border-radius: 12px;
+          margin-bottom: 0.75rem;
+          position: relative;
+        }
+
+        .item-name-v3 { font-weight: 700; font-size: 0.85rem; color: #fff; margin-bottom: 0.5rem; }
+
+        .item-details-v3 { display: flex; align-items: center; gap: 0.75rem; }
+
+        .qty-picker-v3 {
+          display: flex;
+          align-items: center;
+          background: rgba(0,0,0,0.3);
+          border-radius: 8px;
+          padding: 2px;
+        }
+
+        .qty-picker-v3 button {
+          width: 24px;
+          height: 24px;
+          border: none;
+          background: transparent;
+          color: #fff;
+          cursor: pointer;
+        }
+
+        .qty-picker-v3 input {
+          width: 35px;
+          background: transparent;
+          border: none;
+          color: #fff;
+          text-align: center;
+          font-weight: 800;
+          font-size: 0.85rem;
+        }
+
+        .item-total-v3 { font-weight: 900; color: var(--accent-gold); font-size: 1rem; }
+
+        .item-remove-v3 {
+          background: transparent;
+          border: none;
+          color: #ef4444;
+          opacity: 0.3;
+          cursor: pointer;
+        }
+
+        .cart-item-v3:hover .item-remove-v3 { opacity: 1; }
+
+        .side-footer-v3 {
+          padding: 1.5rem;
+          background: rgba(255,255,255,0.02);
+          border-top: 1px solid var(--glass-border);
+        }
+
+        .payment-toggle-v3 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.5rem;
+          margin-bottom: 1.25rem;
+        }
+
+        .payment-toggle-v3 button {
+          height: 40px;
+          border: 1px solid var(--glass-border);
+          background: rgba(255,255,255,0.02);
+          color: var(--text-muted);
+          border-radius: 10px;
+          font-weight: 800;
+          font-size: 0.7rem;
+          cursor: pointer;
+        }
+
+        .payment-toggle-v3 button.active {
+          background: rgba(255,255,255,0.05);
+          color: #fff;
+          border-color: var(--accent-gold);
+        }
+
+        .cash-area-v3 { margin-bottom: 1.5rem; }
+
+        .cash-input-row-v3 {
+          position: relative;
+          margin-bottom: 0.5rem;
+        }
+
+        .cash-input-row-v3 input {
+          width: 100%;
+          height: 50px;
+          background: rgba(0,0,0,0.3);
+          border: 1px solid var(--accent-gold-soft);
+          border-radius: 12px;
+          padding: 0 1rem;
+          color: var(--accent-gold);
+          font-size: 1.4rem;
+          font-weight: 900;
+          text-align: right;
+          padding-right: 3rem;
+        }
+
+        .cash-input-row-v3 svg { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); }
+
+        .quick-cash-grid-v3 {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 0.4rem;
+        }
+
+        .quick-cash-grid-v3 button {
+          height: 35px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid var(--glass-border);
+          border-radius: 8px;
+          color: #fff;
+          font-size: 0.7rem;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+        .summary-area-v3 { margin-bottom: 1.5rem; }
+
+        .summary-row-v3 {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.8rem;
+          color: var(--text-muted);
+          margin-bottom: 0.5rem;
+        }
+
+        .total-display-v3 {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+        }
+
+        .total-label-v3 { font-size: 0.7rem; font-weight: 900; color: var(--text-muted); }
+        .total-value-v3 { font-size: 1.8rem; font-weight: 900; color: var(--accent-gold); }
+
+        .master-checkout-btn-v3 {
+          width: 100%;
+          height: 65px;
+          background: var(--accent-gold);
+          border: none;
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          color: #000;
+          font-weight: 900;
+          font-size: 1rem;
+          cursor: pointer;
+          box-shadow: 0 10px 25px rgba(226, 183, 74, 0.2);
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(5, 10, 15, 0.95);
+          backdrop-filter: blur(15px);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .receipt-glass-modal {
+          width: 440px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid var(--accent-gold-glow);
+          border-radius: 40px;
+          padding: 3.5rem;
+          text-align: center;
+          position: relative;
+        }
+
+        .receipt-financials {
+          margin: 2rem 0;
+          padding: 1.5rem;
+          background: rgba(255,255,255,0.02);
+          border-radius: 24px;
+        }
+
+        .receipt-main-total { margin-bottom: 1.5rem; border-bottom: 1px dashed var(--glass-border); padding-bottom: 1.5rem; }
+        .receipt-main-total strong { font-size: 2.5rem; color: var(--accent-gold); display: block; }
+        .sub-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.9rem; }
+        .pill-gold { background: var(--accent-gold-soft); color: var(--accent-gold); padding: 2px 10px; border-radius: 8px; font-weight: 900; font-size: 0.7rem; }
+      ` }} />
     </div>
   );
 };

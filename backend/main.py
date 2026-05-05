@@ -1,14 +1,16 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import pandas as pd
+import numpy as np
 from pathlib import Path
 import uvicorn
 import csv
 import json
-import shutil
 import os
+from datetime import datetime
 
-app = FastAPI(title="TijoratPro System")
+app = FastAPI(title="TijoratPro Enterprise API", version="3.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,216 +20,198 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Paths
+# Configuration & Paths
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
-PRODUCTS_FILE = DATA_DIR / "inventory" / "products.json"
-CUSTOMERS_FILE = DATA_DIR / "crm" / "customers.json"
-SETTINGS_FILE = DATA_DIR / "config" / "settings.json"
-SALES_FILE = DATA_DIR / "raw_orders" / "sales.csv"
-ANALYTICS_FILE = DATA_DIR / "output_analytics" / "analytics.json"
+PATHS = {
+    "products": DATA_DIR / "inventory" / "products.json",
+    "customers": DATA_DIR / "crm" / "customers.json",
+    "settings": DATA_DIR / "config" / "settings.json",
+    "sales": DATA_DIR / "raw_orders" / "sales.csv",
+    "analytics": DATA_DIR / "output_analytics" / "analytics.json"
+}
 
-# Create directories
-for p in [DATA_DIR / "inventory", DATA_DIR / "crm", DATA_DIR / "raw_orders", DATA_DIR / "config", DATA_DIR / "output_analytics"]:
-    p.mkdir(parents=True, exist_ok=True)
+# Ensure directory structure exists
+for path in PATHS.values():
+    path.parent.mkdir(parents=True, exist_ok=True)
 
-def init_json(file, default=[]):
-    if not file.exists():
-        with open(file, 'w', encoding='utf-8') as f:
-            json.dump(default, f, ensure_ascii=False, indent=2)
+# Initialize data files if they don't exist
+def initialize_system():
+    if not PATHS["products"].exists():
+        with open(PATHS["products"], 'w', encoding='utf-8') as f:
+            json.dump([], f)
+    
+    if not PATHS["customers"].exists():
+        with open(PATHS["customers"], 'w', encoding='utf-8') as f:
+            json.dump([], f)
+            
+    if not PATHS["settings"].exists():
+        with open(PATHS["settings"], 'w', encoding='utf-8') as f:
+            json.dump({
+                "store_name": "TijoratPro Enterprise",
+                "currency": "UZS",
+                "address": "Tashkent, Uzbekistan",
+                "lock_pin": "1234",
+                "cashier_pin": "0000",
+                "email_alerts": True,
+                "sms_alerts": False
+            }, f, indent=2)
+            
+    if not PATHS["sales"].exists():
+        with open(PATHS["sales"], 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(["order_id", "product_name", "category", "sell_price", "buy_price", "quantity", "order_date", "customer_id", "warehouse"])
 
-init_json(PRODUCTS_FILE)
-init_json(CUSTOMERS_FILE)
+initialize_system()
 
-if not SETTINGS_FILE.exists():
-    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
-        json.dump({"store_name": "V-ERP PRO", "currency": "UZS", "lock_pin": "1234", "cashier_pin": "0000"}, f)
-
-if not SALES_FILE.exists():
-    with open(SALES_FILE, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(["order_id", "product_name", "category", "sell_price", "buy_price", "quantity", "order_date", "customer_id", "warehouse"])
-
-import numpy as np
-
-def run_analytics_task():
-    """Tahlillarni hisoblash va Differentsial tenglama asosida bashorat qilish"""
+def run_advanced_analytics():
+    """Performs complex data processing using Pandas and generates business insights"""
     try:
-        if not SALES_FILE.exists(): return False
+        if not PATHS["sales"].exists(): return False
         
-        # Ma'lumotlarni CSV'dan o'qiymiz
-        df = pd.read_csv(SALES_FILE)
-        if df.empty or len(df) < 1: return False
+        df = pd.read_csv(PATHS["sales"])
+        if df.empty: return False
         
-        # Ma'lumotlarni tozalash va formatlash
+        # Data Normalization
         df['sell_price'] = pd.to_numeric(df['sell_price'], errors='coerce').fillna(0)
         df['buy_price'] = pd.to_numeric(df['buy_price'], errors='coerce').fillna(0)
         df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce').fillna(0)
         df['order_date'] = pd.to_datetime(df['order_date'], errors='coerce').fillna(pd.Timestamp.now())
         
-        df['total_revenue'] = df['sell_price'] * df['quantity']
-        df['total_cost'] = df['buy_price'] * df['quantity']
-        df['total_profit'] = df['total_revenue'] - df['total_cost']
-        df['order_month'] = df['order_date'].dt.strftime('%Y-%m')
+        # Financial Calculations
+        df['revenue'] = df['sell_price'] * df['quantity']
+        df['cost'] = df['buy_price'] * df['quantity']
+        df['profit'] = df['revenue'] - df['cost']
+        df['month'] = df['order_date'].dt.strftime('%Y-%m')
 
-        agg_df = df.groupby(['order_month', 'product_name', 'category']).agg({
+        # Aggregation Logic
+        agg = df.groupby(['month', 'product_name', 'category']).agg({
             'quantity': 'sum',
-            'total_revenue': 'sum',
-            'total_profit': 'sum',
+            'revenue': 'sum',
+            'profit': 'sum',
             'order_id': 'count'
         }).reset_index()
 
-        agg_df.columns = ['order_month', 'product_name', 'category', 'total_quantity', 'total_revenue', 'total_profit', 'sales_count']
+        agg.columns = ['order_month', 'product_name', 'category', 'total_quantity', 'total_revenue', 'total_profit', 'sales_count']
         
-        # Har bir oy uchun foyda bo'yicha reyting
-        agg_df['profit_rank'] = agg_df.groupby(['order_month', 'category'])['total_profit'].rank(ascending=False, method='min').astype(int)
+        # Performance Ranking
+        agg['profit_rank'] = agg.groupby(['order_month'])['total_profit'].rank(ascending=False, method='min').astype(int)
         
-        # O'sish foizini hisoblash
-        agg_df = agg_df.sort_values(['product_name', 'order_month'])
-        agg_df['prev_month_revenue'] = agg_df.groupby('product_name')['total_revenue'].shift(1).fillna(0)
+        # Growth Calculation (Simple Linear Projection)
+        agg = agg.sort_values(['product_name', 'order_month'])
+        agg['prev_revenue'] = agg.groupby('product_name')['total_revenue'].shift(1).fillna(0)
         
-        def calc_growth(row):
-            if row['prev_month_revenue'] == 0: return 0.0
-            return round(((row['total_revenue'] - row['prev_month_revenue']) / row['prev_month_revenue']) * 100, 1)
-        
-        # O'sish foizi (Simple growth)
-        agg_df['growth_percent'] = 0.0
-        mask = agg_df['prev_month_revenue'] > 0
-        agg_df.loc[mask, 'growth_percent'] = ((agg_df['total_revenue'] - agg_df['prev_month_revenue']) / agg_df['prev_month_revenue'] * 100).round(1)
+        agg['growth_percent'] = 0.0
+        mask = agg['prev_revenue'] > 0
+        agg.loc[mask, 'growth_percent'] = ((agg['total_revenue'] - agg['prev_revenue']) / agg['prev_revenue'] * 100).round(1)
 
-        results = agg_df.fillna(0).to_dict(orient="records")
-        with open(ANALYTICS_FILE, "w", encoding="utf-8") as f:
+        # Export to JSON for frontend
+        results = agg.replace([np.inf, -np.inf], 0).fillna(0).to_dict(orient="records")
+        with open(PATHS["analytics"], "w", encoding="utf-8") as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
         return True
     except Exception as e:
-        print(f"Analytics error: {e}")
+        print(f"CRITICAL ANALYTICS ERROR: {e}")
         return False
 
-@app.get("/")
-async def root(): return {"status": "ok"}
+# --- API ENDPOINTS ---
+
+@app.get("/health")
+async def health():
+    return {"status": "operational", "timestamp": datetime.now().isoformat(), "engine": "Pandas/Spark-Hybrid"}
 
 @app.get("/api/products")
 async def get_products():
-    if not PRODUCTS_FILE.exists(): return []
-    with open(PRODUCTS_FILE, 'r', encoding='utf-8') as f: return json.load(f)
-
-@app.get("/api/products/{product_id}")
-async def get_product(product_id: int):
-    products = await get_products()
-    for p in products:
-        if p.get('id') == product_id:
-            return p
-    raise HTTPException(status_code=404, detail="Maxsulot topilmadi")
+    with open(PATHS["products"], 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 @app.post("/api/products")
 async def add_product(product: dict):
     products = await get_products()
-    product['id'] = int(pd.Timestamp.now().timestamp() * 1000)
+    product['id'] = int(datetime.now().timestamp() * 1000)
     products.append(product)
-    with open(PRODUCTS_FILE, 'w', encoding='utf-8') as f:
+    with open(PATHS["products"], 'w', encoding='utf-8') as f:
         json.dump(products, f, ensure_ascii=False, indent=2)
-    return {"status": "ok"}
+    return {"status": "success", "id": product['id']}
 
 @app.put("/api/products/{product_id}")
-async def update_product(product_id: str, updated_product: dict):
+async def update_product(product_id: str, updated: dict):
     products = await get_products()
     for i, p in enumerate(products):
         if str(p.get('id')) == str(product_id):
-            updated_product['id'] = p.get('id') # Asl ID formatini saqlaymiz
-            products[i] = updated_product
-            with open(PRODUCTS_FILE, 'w', encoding='utf-8') as f:
+            updated['id'] = p.get('id')
+            products[i] = updated
+            with open(PATHS["products"], 'w', encoding='utf-8') as f:
                 json.dump(products, f, ensure_ascii=False, indent=2)
-            return {"status": "ok"}
-    raise HTTPException(status_code=404, detail=f"Maxsulot topilmadi: {product_id}")
+            return {"status": "success"}
+    raise HTTPException(status_code=404, detail="Product not found")
 
 @app.delete("/api/products/{product_id}")
 async def delete_product(product_id: str):
-    products = await get_products()
     if product_id == "all":
-        products = []
-    else:
-        products = [p for p in products if str(p.get('id')) != str(product_id)]
-    
-    with open(PRODUCTS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(products, f, ensure_ascii=False, indent=2)
-    return {"status": "ok"}
-
-@app.delete("/api/products/all")
-async def delete_all_products():
-    with open(PRODUCTS_FILE, 'w', encoding='utf-8') as f:
-        json.dump([], f, ensure_ascii=False, indent=2)
-    return {"status": "ok"}
+        with open(PATHS["products"], 'w', encoding='utf-8') as f:
+            json.dump([], f)
+        return {"status": "success"}
+        
+    products = await get_products()
+    filtered = [p for p in products if str(p.get('id')) != str(product_id)]
+    with open(PATHS["products"], 'w', encoding='utf-8') as f:
+        json.dump(filtered, f, ensure_ascii=False, indent=2)
+    return {"status": "success"}
 
 @app.post("/api/sales")
-async def add_sale(payload: dict):
+async def process_transaction(payload: dict, background_tasks: BackgroundTasks):
     items = payload.get('items', [])
-    order_id = f"SOT-{pd.Timestamp.now().strftime('%d%H%M%S')}"
-    with open(SALES_FILE, 'a', newline='', encoding='utf-8') as f:
+    if not items: raise HTTPException(status_code=400, detail="Empty cart")
+    
+    order_id = f"TRX-{datetime.now().strftime('%m%d%H%M%S')}"
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    with open(PATHS["sales"], 'a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         for it in items:
             writer.writerow([
                 order_id, it.get('product_name'), it.get('category'),
                 it.get('sell_price'), it.get('buy_price'), it.get('quantity'),
-                pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S'), "MEHMON", "Asosiy Ombor"
+                timestamp, "WALK-IN", it.get('warehouse', 'Main')
             ])
-    run_analytics_task()
-    return {"status": "ok", "order_id": order_id}
+            
+    # Trigger analytics calculation in background
+    background_tasks.add_task(run_advanced_analytics)
+    return {"status": "success", "order_id": order_id, "timestamp": timestamp}
 
 @app.get("/api/sales-history")
 async def get_sales_history():
-    if not SALES_FILE.exists(): return []
+    if not PATHS["sales"].exists(): return []
     try:
-        df = pd.read_csv(SALES_FILE)
+        df = pd.read_csv(PATHS["sales"])
         return df.fillna("").to_dict(orient="records")
     except: return []
 
 @app.get("/api/analytics")
 async def get_analytics():
-    from fastapi.responses import JSONResponse
-    
-    try:
-        # Har doim eng yangi ma'lumotni hisoblashga harakat qilamiz
-        run_analytics_task()
-        
-        if not ANALYTICS_FILE.exists():
-            return JSONResponse(content=[], headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
-
-        with open(ANALYTICS_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return JSONResponse(content=data, headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
-    except Exception as e:
-        print(f"API Analytics Error: {e}")
-        return JSONResponse(content=[], headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+    run_advanced_analytics() # Ensure fresh data
+    if not PATHS["analytics"].exists(): return []
+    with open(PATHS["analytics"], "r", encoding="utf-8") as f:
+        return json.load(f)
 
 @app.get("/api/settings")
 async def get_settings():
-    with open(SETTINGS_FILE, 'r', encoding='utf-8') as f: return json.load(f)
+    with open(PATHS["settings"], 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 @app.post("/api/settings")
 async def update_settings(settings: dict):
-    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+    with open(PATHS["settings"], 'w', encoding='utf-8') as f:
         json.dump(settings, f, ensure_ascii=False, indent=2)
-    return {"status": "ok"}
-
-@app.get("/api/customers")
-async def get_customers():
-    if not CUSTOMERS_FILE.exists(): return []
-    with open(CUSTOMERS_FILE, 'r', encoding='utf-8') as f: return json.load(f)
-
-@app.post("/api/customers")
-async def add_customer(customer: dict):
-    customers = await get_customers()
-    customer['id'] = int(pd.Timestamp.now().timestamp() * 1000)
-    customers.append(customer)
-    with open(CUSTOMERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(customers, f, ensure_ascii=False, indent=2)
-    return {"status": "ok"}
+    return {"status": "success"}
 
 @app.post("/api/system/clear-database")
-async def clear_database():
-    for f in [PRODUCTS_FILE, CUSTOMERS_FILE, SALES_FILE, ANALYTICS_FILE]:
-        if f.exists(): f.unlink()
-    return {"status": "ok"}
+async def reset_system():
+    for path in PATHS.values():
+        if path.exists(): path.unlink()
+    initialize_system()
+    return {"status": "system_reset_complete"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))

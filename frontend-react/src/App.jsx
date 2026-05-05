@@ -57,28 +57,38 @@ const AppContent = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [activeTabState]);
 
-  const { notifications, settings, setUser } = useStore();
-  const adminPin = String(settings?.lock_pin || '').trim();
-  const cashierPin = String(settings?.cashier_pin || '').trim();
+  const { notifications, settings, setUser, loading: storeLoading } = useStore();
+  const [pinError, setPinError] = useState(false);
 
   const handleUnlock = (val) => {
     const inputVal = String(val).trim();
     if (!inputVal) return;
     
-    const isAdmin = adminPin !== '' && inputVal === adminPin;
-    const isCashier = !isAdmin && cashierPin !== '' && inputVal === cashierPin;
+    // Use settings from store with fallbacks
+    const adminPin = String(settings?.lock_pin || '1234').trim();
+    const cashierPin = String(settings?.cashier_pin || '0000').trim();
+
+    const isAdmin = inputVal === adminPin;
+    const isCashier = inputVal === cashierPin;
+
     if (isAdmin) {
       setUser({ name: 'Admin', role: 'admin' });
       setIsAppLocked(false);
       setActiveTab('dashboard');
+      setPinError(false);
     } else if (isCashier) {
       setUser({ name: 'Kassir', role: 'cashier' });
       setIsAppLocked(false);
       setActiveTab('pos');
+      setPinError(false);
     } else {
-      alert("Noto'g'ri PIN kod!");
+      setPinError(true);
       const el = document.getElementById('lock-pass');
-      if (el) el.value = '';
+      if (el) {
+        el.value = '';
+        el.focus();
+      }
+      setTimeout(() => setPinError(false), 2000);
     }
   };
 
@@ -97,31 +107,59 @@ const AppContent = () => {
 
   if (isAppLocked) {
     return (
-      <div style={{ position: 'fixed', inset: 0, background: '#05080d', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 999999 }}>
-        <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '2rem', borderRadius: '50%', marginBottom: '2rem', boxShadow: '0 0 50px rgba(212, 175, 55, 0.2)' }}>
-          <Lock size={64} color="#d4af37" />
+      <div style={{ position: 'fixed', inset: 0, background: 'var(--bg-main)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 999999, backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(226, 183, 74, 0.05) 0%, transparent 70%)' }}>
+        <div className="animate-float" style={{ background: 'rgba(226, 183, 74, 0.05)', padding: '2.5rem', borderRadius: '35px', marginBottom: '3rem', border: '1px solid var(--accent-gold-glow)', boxShadow: '0 0 50px rgba(226, 183, 74, 0.1)' }}>
+          <Lock size={80} color="var(--accent-gold)" strokeWidth={1.5} />
         </div>
-        <h1 style={{ color: 'white', fontSize: '2.5rem', marginBottom: '1rem', fontWeight: '900', letterSpacing: '2px' }}>TIZIM QULFLANGAN</h1>
-        <p style={{ color: '#888', marginBottom: '3rem' }}>Qulfdan chiqarish uchun xavfsizlik PIN kodini kiriting</p>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <input 
-            type="password" 
-            placeholder="****" 
-            className="premium-input" 
-            style={{ width: '200px', textAlign: 'center', fontSize: '1.5rem', letterSpacing: '10px' }} 
-            id="lock-pass" 
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleUnlock(e.target.value);
-              }
-            }}
-          />
-          <button className="btn-premium" onClick={() => {
+        <h1 className="text-gold" style={{ fontSize: '3.5rem', marginBottom: '1rem', fontWeight: '900', letterSpacing: '-3px' }}>TIJORATPRO</h1>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '4rem', fontSize: '1.2rem', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase' }}>Security Access Control</p>
+        
+        <div className={`glass-card ${pinError ? 'shake' : ''}`} style={{ 
+          padding: '3rem', 
+          width: '450px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '2rem', 
+          borderRadius: '35px', 
+          background: 'rgba(255,255,255,0.02)',
+          border: pinError ? '2px solid #ef4444' : '1px solid var(--glass-border-bright)',
+          transition: 'border-color 0.3s'
+        }}>
+          <div style={{ position: 'relative' }}>
+            <label style={{ display: 'block', color: pinError ? '#ef4444' : 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem', textAlign: 'center' }}>
+              {pinError ? "NOTO'G'RI PIN KOD!" : "XAVFSIZLIK PIN KODINI KIRITING"}
+            </label>
+            <input 
+              type="password" 
+              placeholder="••••" 
+              className="premium-input" 
+              autoFocus
+              style={{ 
+                height: '75px', 
+                textAlign: 'center', 
+                fontSize: '2.5rem', 
+                letterSpacing: '15px', 
+                borderRadius: '22px', 
+                border: 'none',
+                background: 'rgba(255,255,255,0.05)'
+              }} 
+              id="lock-pass" 
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleUnlock(e.target.value);
+                }
+              }}
+            />
+          </div>
+          <button className="btn-premium" style={{ height: '70px', borderRadius: '22px', fontSize: '1.1rem' }} onClick={() => {
             const val = document.getElementById('lock-pass').value;
             handleUnlock(val);
           }}>
-            Ochish
+            TIZIMGA KIRISH
           </button>
+        </div>
+        <div style={{ marginTop: '4rem', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '700', letterSpacing: '1px' }}>
+          &copy; 2024 TIJORATPRO CLOUD ERP . ALL RIGHTS RESERVED
         </div>
       </div>
     );
