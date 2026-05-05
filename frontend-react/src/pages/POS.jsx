@@ -275,7 +275,7 @@ const POS = () => {
                 cursor: 'pointer', 
                 padding: '1.5rem', 
                 background: 'rgba(255,255,255,0.02)',
-                border: activeTab === product.id ? '1px solid var(--accent-gold)' : '1px solid var(--glass-border)',
+                border: '1px solid var(--glass-border)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.75rem'
