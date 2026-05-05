@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  Settings as SettingsIcon,
   Save,
   Shield,
   Bell,
@@ -20,7 +19,9 @@ import {
   Server,
   ToggleLeft,
   ToggleRight,
-  ChevronRight
+  ChevronRight,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { API_BASE_URL } from '../api';
@@ -76,6 +77,8 @@ const Settings = () => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
   const [saved, setSaved] = useState(false);
+  const [showAdminPin, setShowAdminPin] = useState(false);
+  const [showCashierPin, setShowCashierPin] = useState(false);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -321,30 +324,44 @@ const Settings = () => {
                   <div>
                     <FieldGroup label="Admin PIN Kodi" hint="Lock ekrani va bosh admin uchun. Minimal 4 raqam.">
                       <div style={{ position: 'relative' }}>
-                        <Lock size={18} style={{ position: 'absolute', left: '1.1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-gold)' }} />
+                        <Lock size={18} style={{ position: 'absolute', left: '1.1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-gold)', zIndex: 1 }} />
                         <input
-                          type="password"
-                          style={{ ...inputStyle, paddingLeft: '3rem', border: '1px solid var(--accent-gold-glow)', letterSpacing: '4px', fontSize: '1.2rem' }}
+                          type={showAdminPin ? 'text' : 'password'}
+                          style={{ ...inputStyle, paddingLeft: '3rem', paddingRight: '3rem', border: '1px solid var(--accent-gold-glow)', letterSpacing: showAdminPin ? '2px' : '4px', fontSize: '1.2rem' }}
                           value={settings.lock_pin || ''}
                           onChange={e => setSettings({ ...settings, lock_pin: e.target.value })}
                           placeholder="••••"
                           maxLength={12}
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowAdminPin(v => !v)}
+                          style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.25rem', display: 'flex', alignItems: 'center' }}
+                        >
+                          {showAdminPin ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                       </div>
                     </FieldGroup>
                   </div>
                   <div>
                     <FieldGroup label="Kassir PIN Kodi" hint="Faqat kassa moduliga kirish uchun ishlatiladi.">
                       <div style={{ position: 'relative' }}>
-                        <Lock size={18} style={{ position: 'absolute', left: '1.1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-emerald)' }} />
+                        <Lock size={18} style={{ position: 'absolute', left: '1.1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-emerald)', zIndex: 1 }} />
                         <input
-                          type="password"
-                          style={{ ...inputStyle, paddingLeft: '3rem', border: '1px solid rgba(16,185,129,0.3)', letterSpacing: '4px', fontSize: '1.2rem' }}
+                          type={showCashierPin ? 'text' : 'password'}
+                          style={{ ...inputStyle, paddingLeft: '3rem', paddingRight: '3rem', border: '1px solid rgba(16,185,129,0.3)', letterSpacing: showCashierPin ? '2px' : '4px', fontSize: '1.2rem' }}
                           value={settings.cashier_pin || ''}
                           onChange={e => setSettings({ ...settings, cashier_pin: e.target.value })}
                           placeholder="••••"
                           maxLength={12}
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowCashierPin(v => !v)}
+                          style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.25rem', display: 'flex', alignItems: 'center' }}
+                        >
+                          {showCashierPin ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                       </div>
                     </FieldGroup>
                   </div>
