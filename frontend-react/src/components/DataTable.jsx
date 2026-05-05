@@ -11,49 +11,40 @@ const DataTable = ({ data }) => {
       'Kategoriya': row.category || '-',
       'Sotuv Miqdori (ta)': row.total_quantity || 0,
       "Jami Tushum (so'm)": row.total_revenue || 0,
-      "Sof Foyda (so'm)": row.total_profit || 0,
-      "O'sish Dinamikasi (%)": row.growth_percent || 0
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
-    
-    // Kengliklarni sozlash (Xunuk chiqmasligi uchun)
-    worksheet['!cols'] = [
-      {wch: 15}, {wch: 25}, {wch: 15}, {wch: 20}, 
-      {wch: 18}, {wch: 20}, {wch: 20}, {wch: 22}
-    ];
-
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Top Maxsulotlar");
-    
-    XLSX.writeFile(workbook, "Top_Maxsulotlar_Hisoboti.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Analytics");
+    XLSX.writeFile(workbook, "V_ERP_Pro_Analytics.xlsx");
   };
 
   return (
-    <div className="glass-card" style={{ padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div className="glass-card" style={{ padding: '2.5rem', border: 'none', background: 'transparent', backdropFilter: 'none' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '800', letterSpacing: '-0.5px' }}>
-            <FileSpreadsheet size={20} style={{ verticalAlign: 'middle', marginRight: '0.75rem', color: '#d4af37' }} />
-            Maxsulotlar Bo'yicha Batafsil Tahlil
+          <h2 style={{ fontSize: '1.75rem', fontWeight: '800', letterSpacing: '-1px', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <FileSpreadsheet size={28} className="text-gold" />
+            <span className="text-gradient">Performance Analytics</span>
           </h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>Top 10 eng foydali maxsulotlar va ularning oylik ko'rsatkichlari</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.5rem' }}>Top performing products and their monthly growth dynamics</p>
         </div>
-        <button className="btn-premium btn-ghost" style={{ fontSize: '0.8rem', padding: '0.6rem 1.25rem' }} onClick={handleExport}>Eksport (Excel)</button>
+        <button className="btn-premium" onClick={exportToExcel} style={{ fontSize: '0.8rem', padding: '0.7rem 1.5rem' }}>
+          <FileSpreadsheet size={18} /> Export Data
+        </button>
       </div>
 
       <div style={{ overflowX: 'auto' }}>
         <table className="premium-table">
           <thead>
             <tr>
-              <th>Reyting (Spark AI)</th>
-              <th>Maxsulot Nomi</th>
-              <th>Hisobot Oyi</th>
-              <th>Kategoriya</th>
-              <th>Sotuv Miqdori</th>
-              <th>Jami Tushum</th>
-              <th>Sof Foyda</th>
-              <th>O'sish Dinamikasi</th>
+              <th>Rank</th>
+              <th>Product Name</th>
+              <th>Month</th>
+              <th>Category</th>
+              <th>Volume</th>
+              <th>Revenue</th>
+              <th>Net Profit</th>
+              <th>Dynamics</th>
             </tr>
           </thead>
           <tbody>
@@ -61,34 +52,50 @@ const DataTable = ({ data }) => {
               <tr key={idx}>
                 <td>
                   <div style={{ 
-                    width: '32px', height: '32px', 
-                    borderRadius: '50%', 
-                    background: row.profit_rank === 1 ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.05)',
-                    color: row.profit_rank === 1 ? '#d4af37' : '#888',
+                    width: '36px', height: '36px', 
+                    borderRadius: '12px', 
+                    background: row.profit_rank === 1 ? 'var(--accent-gold-soft)' : 'rgba(255,255,255,0.03)',
+                    color: row.profit_rank === 1 ? 'var(--accent-gold)' : 'var(--text-muted)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: '800'
+                    fontWeight: '800',
+                    border: `1px solid ${row.profit_rank === 1 ? 'var(--accent-gold-glow)' : 'var(--glass-border)'}`
                   }}>
                     {row.profit_rank || (idx + 1)}
                   </div>
                 </td>
-                <td style={{ fontWeight: '700' }}>{row.product_name || 'Noma\'lum'}</td>
-                <td>{row.order_month || '-'}</td>
-                <td style={{ color: 'var(--text-secondary)' }}>{row.category || '-'}</td>
-                <td style={{ fontWeight: '700' }}>{row.total_quantity || 0} ta</td>
-                <td style={{ color: '#10b981', fontWeight: '800' }}>{(row.total_revenue || 0).toLocaleString()} so'm</td>
-                <td style={{ color: '#d4af37', fontWeight: '800' }}>{(row.total_profit || 0).toLocaleString()} so'm</td>
+                <td style={{ fontWeight: '700', color: '#fff' }}>{row.product_name || 'Unknown'}</td>
+                <td>
+                  <span style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>{row.order_month || '-'}</span>
+                </td>
+                <td>
+                  <span style={{ 
+                    padding: '4px 10px', 
+                    background: 'rgba(255,255,255,0.03)', 
+                    borderRadius: '8px', 
+                    fontSize: '0.75rem',
+                    color: 'var(--text-muted)',
+                    border: '1px solid var(--glass-border)'
+                  }}>
+                    {row.category || '-'}
+                  </span>
+                </td>
+                <td style={{ fontWeight: '700' }}>{row.total_quantity || 0} units</td>
+                <td style={{ fontWeight: '800', color: 'var(--accent-emerald)' }}>{(row.total_revenue || 0).toLocaleString()} <small>UZS</small></td>
+                <td style={{ fontWeight: '800', color: 'var(--accent-gold)' }}>{(row.total_profit || 0).toLocaleString()} <small>UZS</small></td>
                 <td>
                   <div style={{ 
-                    color: (row.growth_percent || 0) >= 0 ? '#10b981' : '#ef4444', 
+                    color: (row.growth_percent || 0) > 0 ? 'var(--accent-emerald)' : (row.growth_percent || 0) < 0 ? '#ef4444' : 'var(--text-muted)', 
                     fontWeight: '800', 
                     display: 'flex', 
                     alignItems: 'center', 
-                    gap: '0.25rem',
-                    background: (row.growth_percent || 0) >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                    padding: '4px 8px',
-                    borderRadius: '12px',
-                    width: 'fit-content'
+                    gap: '0.5rem',
+                    background: (row.growth_percent || 0) > 0 ? 'rgba(16, 185, 129, 0.1)' : (row.growth_percent || 0) < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)',
+                    padding: '6px 12px',
+                    borderRadius: '10px',
+                    width: 'fit-content',
+                    fontSize: '0.85rem'
                   }}>
+                    {(row.growth_percent || 0) > 0 ? <TrendingUp size={14} /> : (row.growth_percent || 0) < 0 ? <TrendingDown size={14} /> : <Minus size={14} />}
                     {(row.growth_percent || 0) > 0 ? '+' : ''}{(row.growth_percent || 0).toFixed(1)}%
                   </div>
                 </td>

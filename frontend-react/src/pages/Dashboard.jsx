@@ -212,68 +212,76 @@ const Dashboard = () => {
   }, [products, productData, growthPercent, trendData]);
 
   return (
-    <div className="dashboard-view" style={{ animation: 'fadeIn 0.5s ease' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <Header onRefresh={fetchAnalytics} />
-        <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-          {[
-            { id: 'day', label: 'Kun' },
-            { id: 'week', label: 'Hafta' },
-            { id: 'month', label: 'Oy' },
-            { id: 'year', label: 'Yil' },
-            { id: 'all', label: 'Hammasi' }
-          ].map(f => (
-            <button
-              key={f.id}
-              onClick={() => setTimeFilter(f.id)}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: timeFilter === f.id ? '#8b5cf6' : 'transparent',
-                color: timeFilter === f.id ? 'white' : '#888',
-                fontSize: '0.8rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              {f.label}
-            </button>
-          ))}
+    <div className="dashboard-view fadeIn">
+      {/* Premium Header Section */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <div className="ai-status-pulse"></div>
+            <span style={{ fontSize: '0.8rem', color: 'var(--accent-emerald)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Live System Active</span>
+          </div>
+          <h1 className="text-gradient" style={{ fontSize: '3rem', fontWeight: '800', letterSpacing: '-2px', marginBottom: '0.5rem' }}>Business Intelligence</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Xush kelibsiz, <strong style={{color: '#fff'}}>Admin</strong>. Tizim tahlillari muvaffaqiyatli yakunlandi.</p>
         </div>
-        <button 
-          className="btn-premium btn-ghost" 
-          onClick={fetchAnalytics}
-          style={{ marginTop: '0' }}
-        >
-          <RefreshCcw size={18} /> Yangilash
-        </button>
+
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '6px', borderRadius: '14px', border: '1px solid var(--glass-border)' }}>
+            {[
+              { id: 'day', label: 'Kun' },
+              { id: 'week', label: 'Hafta' },
+              { id: 'month', label: 'Oy' },
+              { id: 'year', label: 'Yil' },
+              { id: 'all', label: 'Jami' }
+            ].map(f => (
+              <button
+                key={f.id}
+                onClick={() => setTimeFilter(f.id)}
+                style={{
+                  padding: '0.6rem 1.25rem',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: timeFilter === f.id ? 'var(--accent-gold)' : 'transparent',
+                  color: timeFilter === f.id ? '#000' : 'var(--text-secondary)',
+                  fontSize: '0.8rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'var(--transition)'
+                }}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <button className="btn-premium btn-ghost" onClick={fetchAnalytics} style={{ padding: '0.8rem' }}>
+            <RefreshCcw size={20} className={loading ? "animate-spin" : ""} />
+          </button>
+        </div>
       </div>
 
-      <div style={{ 
-        background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%)', 
-        border: '1px solid rgba(139, 92, 246, 0.3)', 
-        borderRadius: '16px', 
-        padding: '1.5rem', 
-        marginBottom: '2rem',
-        boxShadow: '0 0 40px rgba(139, 92, 246, 0.05)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-          <BrainCircuit size={24} color="#8b5cf6" />
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'white' }}>V-ERP AI Maslahatchisi</h2>
+      {/* AI Intelligence Section */}
+      <div className="ai-advisor-container animate-float">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div style={{ background: 'var(--accent-purple)', padding: '0.75rem', borderRadius: '14px', boxShadow: '0 0 20px var(--accent-purple-glow)' }}>
+            <BrainCircuit size={24} color="#fff" />
+          </div>
+          <div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'white' }}>V-ERP AI Intelligent Assistant</h2>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Spark Big Data algoritmlari asosidagi real-vaqt tavsiyalari</p>
+          </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
           {aiAdvices.map((adv, idx) => (
             <div key={idx} style={{ 
-              background: 'rgba(0,0,0,0.3)', 
-              padding: '1rem', 
-              borderRadius: '12px', 
-              borderLeft: '4px solid #8b5cf6',
-              fontSize: '0.9rem',
-              lineHeight: '1.5'
+              background: 'rgba(5, 10, 15, 0.4)', 
+              padding: '1.25rem', 
+              borderRadius: '18px', 
+              border: '1px solid var(--glass-border)',
+              borderLeft: '4px solid var(--accent-purple)',
+              fontSize: '0.95rem',
+              lineHeight: '1.6',
+              backdropFilter: 'blur(10px)'
             }}>
-              {adv.icon} {adv.text}
+              <span style={{ marginRight: '0.75rem' }}>{adv.icon}</span> {adv.text}
             </div>
           ))}
         </div>
@@ -281,37 +289,40 @@ const Dashboard = () => {
 
       <StatsGrid kpis={kpis} />
 
-      {/* Visual Analysis Section (Restored Recharts) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+      {/* Visual Analytics Hub */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
         <Charts trendData={trendData} countryData={productData} />
         
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Tezkor Statistikalar</h3>
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Quick Insights</h3>
+            <TrendingUp size={20} color="var(--accent-gold)" />
+          </div>
           
-          <div style={{ padding: '1.25rem', background: `${growthColor}10`, borderRadius: '16px', border: `1px solid ${growthColor}20` }}>
-            <div style={{ fontSize: '0.8rem', color: growthColor, fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Oylik O'sish</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem', color: growthColor }}>
+          <div style={{ padding: '1.5rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '20px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '1px' }}>Monthly Growth</div>
+            <div style={{ fontSize: '2rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-emerald)' }}>
               {growthPercent >= 0 ? '+' : ''}{growthPercent.toFixed(1)}% 
-              {growthPercent >= 0 ? <ArrowUpRight size={22} /> : <ArrowDownRight size={22} />}
+              {growthPercent >= 0 ? <ArrowUpRight size={24} /> : <ArrowDownRight size={24} />}
             </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>O'tgan oyga nisbatan</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Compared to previous month</div>
           </div>
 
-          <div style={{ padding: '1.25rem', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '16px', border: '1px solid rgba(212, 175, 55, 0.1)' }}>
-            <div style={{ fontSize: '0.8rem', color: '#d4af37', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Ombor Qiymati</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: '800' }}>
-              {(products || []).reduce((acc, p) => acc + (Number(p.buy_price || 0) * Number(p.stock || 0)), 0).toLocaleString()} <small style={{fontSize: '0.8rem', color: '#666'}}>so'm</small>
+          <div style={{ padding: '1.5rem', background: 'rgba(226, 183, 74, 0.03)', borderRadius: '20px', border: '1px solid rgba(226, 183, 74, 0.1)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '1px' }}>Inventory Value</div>
+            <div style={{ fontSize: '2rem', fontWeight: '800', color: '#fff' }}>
+              {(products || []).reduce((acc, p) => acc + (Number(p.buy_price || 0) * Number(p.stock || 0)), 0).toLocaleString()} <small style={{fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500'}}>UZS</small>
             </div>
           </div>
 
-          <div style={{ padding: '1.25rem', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '16px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#8b5cf6', fontWeight: '800', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-              <BrainCircuit size={16} /> AI Bashorati
+          <div style={{ padding: '1.5rem', background: 'rgba(139, 92, 246, 0.03)', borderRadius: '20px', border: '1px solid rgba(139, 92, 246, 0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--accent-purple)', fontWeight: '800', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '1px' }}>
+              <BrainCircuit size={16} /> AI Forecast
             </div>
-            <div style={{ fontSize: '1.75rem', fontWeight: '800' }}>
-              +{Math.round(growthPercent > 0 ? totalRevenue * 1.15 : totalRevenue * 1.05).toLocaleString()} <small style={{fontSize: '0.8rem', color: '#666'}}>so'm</small>
+            <div style={{ fontSize: '2rem', fontWeight: '800', color: '#fff' }}>
+              +{Math.round(growthPercent > 0 ? totalRevenue * 1.15 : totalRevenue * 1.05).toLocaleString()} <small style={{fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500'}}>UZS</small>
             </div>
-            <div style={{ fontSize: '0.7rem', color: '#8b5cf6', marginTop: '0.4rem' }}>Keyingi oy kutilayotgan tushum (bashorat)</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Expected revenue for next period</div>
           </div>
         </div>
       </div>
