@@ -1,21 +1,56 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { 
   Cpu, RefreshCcw, BarChart3, BrainCircuit, FileSpreadsheet
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
 const Analytics = () => {
-  const { analytics, fetchAnalytics, loading } = useStore();
+  const { analytics, salesHistory, fetchAnalytics, fetchSalesHistory, loading } = useStore();
   
-  // Ma'lumotlarni xavfsiz formatlash
   const data = Array.isArray(analytics) ? analytics : [];
+  const sales = Array.isArray(salesHistory) ? salesHistory : [];
 
   useEffect(() => {
     fetchAnalytics().catch(err => console.error("Fetch error:", err));
+    fetchSalesHistory().catch(() => {});
   }, []);
 
-  const totalRevenue = data.reduce((acc, curr) => acc + (Number(curr.total_revenue) || 0), 0);
-  const totalProfit = data.reduce((acc, curr) => acc + (Number(curr.total_profit) || 0), 0);
+  // salesHistory dan to'g'ridan-to'g'ri hisoblash — har doim to'g'ri ma'lumot
+  const totalRevenue = useMemo(() =>
+    sales.reduce((acc, s) => acc + (Number(s.sell_price || 0) * Number(s.quantity || 0)), 0)
+  , [sales]);
+
+  const totalProfit = useMemo(() =>
+    sales.reduce((acc, s) => acc + ((Number(s.sell_price || 0) - Number(s.buy_price || 0)) * Number(s.quantity || 0)), 0)
+  , [sales]);
+
+  const totalOrders = useMemo(() =>
+    new Set(sales.map(s => s.order_id)).size
+  , [sales]);
+
+  // Top mahsulotlar: avval analytics dan, bo'sh bo'lsa salesHistory dan hisoblash
+  const topProducts = useMemo(() => {
+    if (data.length > 0) {
+      const map = {};
+      data.forEach(item => {
+        const name = item.product_name;
+        if (!map[name]) map[name] = { product_name: name, category: item.category || '-', total_revenue: 0, total_quantity: 0 };
+        map[name].total_revenue += Number(item.total_revenue || 0);
+        map[name].total_quantity += Number(item.total_quantity || 0);
+      });
+      return Object.values(map).sort((a, b) => b.total_revenue - a.total_revenue).slice(0, 10);
+    }
+    // salesHistory dan fallback hisoblash
+    const map = {};
+    sales.forEach(s => {
+      const name = s.product_name;
+      if (!name) return;
+      if (!map[name]) map[name] = { product_name: name, category: s.category || '-', total_revenue: 0, total_quantity: 0 };
+      map[name].total_revenue += Number(s.sell_price || 0) * Number(s.quantity || 0);
+      map[name].total_quantity += Number(s.quantity || 0);
+    });
+    return Object.values(map).sort((a, b) => b.total_revenue - a.total_revenue).slice(0, 10);
+  }, [data, sales]);
 
   return (
     <div className="analytics-view fadeIn">
@@ -37,7 +72,7 @@ const Analytics = () => {
       </div>
 
       {/* Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem', marginBottom: '3.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3.5rem' }}>
         <div className="glass-card stat-item animate-float" style={{ borderLeft: '4px solid var(--accent-emerald)', padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <span style={{ color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Umumiy Tushum</span>
@@ -48,7 +83,7 @@ const Analytics = () => {
           <h3 className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem' }}>
             {totalRevenue.toLocaleString()} <small style={{fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600'}}>UZS</small>
           </h3>
-          <div style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)', fontWeight: '800' }}>Real-vaqt tizimidagi ma'lumot</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)', fontWeight: '800' }}>Barcha sotuv tranzaksiyalari</div>
         </div>
 
         <div className="glass-card stat-item animate-float" style={{ borderLeft: '4px solid var(--accent-purple)', padding: '2rem', animationDelay: '0.1s' }}>
@@ -61,7 +96,20 @@ const Analytics = () => {
           <h3 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#fff', marginBottom: '0.5rem' }}>
             {totalProfit.toLocaleString()} <small style={{fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600'}}>UZS</small>
           </h3>
-          <div style={{ fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: '800' }}>AI tomonidan hisoblangan ko'rsatkich</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: '800' }}>Sotish - Xarid narxi</div>
+        </div>
+
+        <div className="glass-card stat-item animate-float" style={{ borderLeft: '4px solid var(--accent-gold)', padding: '2rem', animationDelay: '0.2s' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <span style={{ color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Jami Cheklar</span>
+            <div className="stat-icon-wrapper" style={{ width: '40px', height: '40px', background: 'var(--accent-gold-soft)', borderRadius: '12px', marginBottom: '0' }}>
+              <FileSpreadsheet size={20} color="var(--accent-gold)" />
+            </div>
+          </div>
+          <h3 className="text-gold" style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem' }}>
+            {totalOrders.toLocaleString()} <small style={{fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600'}}>ta</small>
+          </h3>
+          <div style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', fontWeight: '800' }}>Yakunlangan tranzaksiyalar</div>
         </div>
       </div>
 
@@ -77,9 +125,9 @@ const Analytics = () => {
           </button>
         </div>
         
-        {data.length > 0 ? (
+        {topProducts.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem' }}>
-            {data.slice(0, 10).map((item, idx) => (
+            {topProducts.map((item, idx) => (
               <div key={idx} className="glass-card" style={{ 
                 padding: '1.5rem', 
                 background: 'rgba(255,255,255,0.01)', 
@@ -93,14 +141,15 @@ const Analytics = () => {
                   <div style={{ 
                     width: '40px', 
                     height: '40px', 
-                    background: 'rgba(255,255,255,0.03)', 
+                    background: idx === 0 ? 'var(--accent-gold-soft)' : 'rgba(255,255,255,0.03)', 
                     borderRadius: '10px', 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
                     fontWeight: '900',
-                    color: 'var(--accent-gold)',
-                    fontSize: '1rem'
+                    color: idx === 0 ? 'var(--accent-gold)' : 'var(--text-muted)',
+                    fontSize: '1rem',
+                    flexShrink: 0
                   }}>
                     {idx + 1}
                   </div>
@@ -110,7 +159,7 @@ const Analytics = () => {
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: '900', color: 'var(--accent-emerald)', fontSize: '1.25rem' }}>{Number(item.total_revenue).toLocaleString()} <small style={{fontSize: '0.75rem'}}>UZS</small></div>
+                  <div style={{ fontWeight: '900', color: 'var(--accent-emerald)', fontSize: '1.25rem' }}>{Math.round(item.total_revenue).toLocaleString()} <small style={{fontSize: '0.75rem'}}>UZS</small></div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', fontWeight: '700' }}>{item.total_quantity} dona sotilgan</div>
                 </div>
               </div>
@@ -119,7 +168,7 @@ const Analytics = () => {
         ) : (
           <div style={{ textAlign: 'center', padding: '6rem 0' }}>
             <Cpu size={60} className="animate-spin" style={{ marginBottom: '2rem', opacity: 0.1, color: 'var(--accent-gold)' }} />
-            <div style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: '600' }}>Ma'lumotlar tahlil qilinmoqda...</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: '600' }}>Hozircha sotuv ma'lumotlari yo'q...</div>
           </div>
         )}
       </div>
