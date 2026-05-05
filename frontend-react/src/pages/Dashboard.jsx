@@ -156,10 +156,18 @@ const Dashboard = () => {
         { name: 'Mahsulot C', value: 200000 }
       ];
     }
-    return analytics
-      .sort((a, b) => b.total_profit - a.total_profit)
-      .slice(0, 5)
-      .map(item => ({ name: item.product_name, value: item.total_profit }));
+    
+    // Har bir mahsulot bo'yicha umumiy foydani hisoblaymiz (Aggregation)
+    const productMap = {};
+    analytics.forEach(item => {
+      const name = item.product_name;
+      productMap[name] = (productMap[name] || 0) + (Number(item.total_profit) || 0);
+    });
+
+    return Object.entries(productMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
   }, [analytics]);
 
   // Filtrangan tahlillar (DataTable uchun)
