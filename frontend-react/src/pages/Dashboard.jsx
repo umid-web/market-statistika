@@ -69,8 +69,8 @@ const Dashboard = () => {
   , [totalRevenue, totalOrders]);
 
   // Trend calculation
-  const { revenueTrend, ordersTrend } = React.useMemo(() => {
-    if (!salesHistory || timeFilter === 'all') return { revenueTrend: '0.0%', ordersTrend: '0.0%' };
+  const { revenueTrend, ordersTrend, productsTrend, avgCheckTrend } = React.useMemo(() => {
+    if (!salesHistory || timeFilter === 'all') return { revenueTrend: '0.0%', ordersTrend: '0.0%', productsTrend: '0.0%', avgCheckTrend: '0.0%' };
 
     const now = new Date();
     let prevStart, prevEnd;
@@ -93,7 +93,7 @@ const Dashboard = () => {
         prevEnd = new Date(now.getFullYear() - 1, 11, 31);
         break;
       default:
-        return { revenueTrend: '0.0%', ordersTrend: '0.0%' };
+        return { revenueTrend: '0.0%', ordersTrend: '0.0%', productsTrend: '0.0%', avgCheckTrend: '0.0%' };
     }
 
     const prevSales = salesHistory.filter(s => {
@@ -103,18 +103,26 @@ const Dashboard = () => {
 
     const prevRev = prevSales.reduce((acc, s) => acc + (Number(s.sell_price * s.quantity) || 0), 0);
     const prevOrd = [...new Set(prevSales.map(s => s.order_id))].length;
+    const prevAvgCheck = prevOrd > 0 ? prevRev / prevOrd : 0;
+    
+    // Mahsulotlar trendi uchun: joriy davrda sotilgan unikal mahsulotlar sonini solishtiramiz
+    const currentUniqueProds = [...new Set(filteredSales.map(s => s.product_id))].length;
+    const prevUniqueProds = [...new Set(prevSales.map(s => s.product_id))].length;
 
     const calcPercent = (curr, prev) => {
       if (prev === 0) return curr > 0 ? '+100%' : '0.0%';
       const p = ((curr - prev) / prev) * 100;
+      if (p === 0) return '0.0%';
       return (p >= 0 ? '+' : '') + p.toFixed(1) + '%';
     };
 
     return {
       revenueTrend: calcPercent(totalRevenue, prevRev),
-      ordersTrend: calcPercent(totalOrders, prevOrd)
+      ordersTrend: calcPercent(totalOrders, prevOrd),
+      productsTrend: calcPercent(currentUniqueProds, prevUniqueProds),
+      avgCheckTrend: calcPercent(avgOrderValue, prevAvgCheck)
     };
-  }, [salesHistory, timeFilter, totalRevenue, totalOrders]);
+  }, [salesHistory, timeFilter, totalRevenue, totalOrders, avgOrderValue, filteredSales]);
 
   const periodLabels = {
     day: 'Bugungi',
@@ -127,8 +135,8 @@ const Dashboard = () => {
   const kpis = [
     { title: `${periodLabels[timeFilter]} Tushum`, value: `${totalRevenue.toLocaleString()}`, unit: "so'm", icon: DollarSign, trend: revenueTrend, color: "#10b981", bg: "rgba(16, 185, 129, 0.1)" },
     { title: `${periodLabels[timeFilter]} Buyurtmalar`, value: totalOrders.toLocaleString(), unit: "ta", icon: ShoppingCart, trend: ordersTrend, color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },
-    { title: "Mahsulotlar", value: totalProducts.toLocaleString(), unit: "tur", icon: Package, trend: "0.0%", color: "#d4af37", bg: "rgba(212, 175, 55, 0.1)" },
-    { title: "O'rtacha Chek", value: `${Math.round(avgOrderValue).toLocaleString()}`, unit: "so'm", icon: TrendingUp, trend: revenueTrend, color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)" },
+    { title: "Sotilgan Mahsulotlar", value: [...new Set(filteredSales.map(s => s.product_id))].length.toLocaleString(), unit: "tur", icon: Package, trend: productsTrend, color: "#d4af37", bg: "rgba(212, 175, 55, 0.1)" },
+    { title: "O'rtacha Chek", value: `${Math.round(avgOrderValue).toLocaleString()}`, unit: "so'm", icon: TrendingUp, trend: avgCheckTrend, color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)" },
   ];
 
   // Process data for charts
